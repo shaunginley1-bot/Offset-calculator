@@ -1,1 +1,197 @@
-test
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Offset Mortgage Calculator</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.2.1"></script>
+<style>
+:root{--navy:#0f1b2d;--navy2:#162033;--teal:#00c9a7;--teal2:#00e5c0;--amber:#f59e0b;--red:#ef4444;--surface:#1a2740;--surface2:#223050;--border:rgba(255,255,255,0.07);--text:#e8edf5;--muted:#8898aa;}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--navy);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%;text-size-adjust:100%;}
+#app{display:flex;flex-direction:column;width:100vw;width:100%;height:100vh;height:100dvh;min-height:-webkit-fill-available;}
+#topbar{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:12px 16px;padding-top:max(12px,env(safe-area-inset-top));background:var(--navy);border-bottom:1px solid var(--border);}
+#topbar h1{font-size:1.1rem;font-weight:700;color:var(--teal);}
+#topbar .sub{font-size:0.6rem;color:var(--muted);}
+.pill{background:var(--teal);color:var(--navy);font-weight:700;font-size:0.7rem;padding:5px 12px;border-radius:50px;white-space:nowrap;}
+#tabnav{flex-shrink:0;display:flex;background:var(--navy2);border-bottom:1px solid var(--border);}
+.tab{flex:1;padding:9px 4px;text-align:center;font-size:0.65rem;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;-webkit-user-select:none;}
+.tab.active{color:var(--teal);border-bottom-color:var(--teal);}
+.ti{font-size:0.95rem;display:block;margin-bottom:1px;}
+#panels{flex:1;overflow:hidden;position:relative;}
+.panel{position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 14px max(20px,env(safe-area-inset-bottom));display:none;}
+.panel.active{display:block;}
+.stitle{font-size:0.9rem;font-weight:700;color:var(--teal2);margin:16px 0 9px;}
+.stitle:first-child{margin-top:2px;}
+.ig{margin-bottom:12px;}
+.ig label{display:block;font-size:0.65rem;font-weight:600;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em;}
+.irow{display:flex;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:9px;overflow:hidden;}
+.ipfx{padding:0 10px;color:var(--muted);font-size:0.9rem;font-weight:600;flex-shrink:0;}
+.irow input[type=number],.irow input[type=date]{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-size:1rem;font-weight:500;padding:12px 10px 12px 0;width:100%;-webkit-appearance:none;}
+.irow input[type=date]{padding-left:10px;}
+.irow input[type=date]::-webkit-calendar-picker-indicator{filter:invert(0.5);margin-right:6px;}
+.swrap{margin-bottom:12px;}
+.swrap label{display:flex;justify-content:space-between;align-items:baseline;font-size:0.65rem;font-weight:600;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em;}
+.swrap label span{font-size:1rem;font-weight:700;color:var(--teal);text-transform:none;letter-spacing:0;}
+input[type=range]{-webkit-appearance:none;width:100%;height:6px;background:var(--surface2);border-radius:3px;outline:none;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;background:var(--teal);border-radius:50%;cursor:pointer;box-shadow:0 2px 8px rgba(0,201,167,0.4);}
+.rgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
+.rcard{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px;}
+.rcard.acc{background:linear-gradient(135deg,#0d2e26,#0a2020);border-color:rgba(0,201,167,0.22);}
+.rc-lbl{font-size:0.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;}
+.rc-val{font-size:1.25rem;font-weight:700;color:var(--text);line-height:1;}
+.rcard.acc .rc-val{color:var(--teal);}
+.rc-sub{font-size:0.6rem;color:var(--muted);margin-top:3px;}
+.sbanner{background:var(--teal);border-radius:14px;padding:16px;text-align:center;margin-bottom:10px;}
+.sb-lbl{font-size:0.65rem;color:var(--navy);font-weight:700;opacity:0.7;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:2px;}
+.sb-amt{font-size:2.2rem;font-weight:700;color:var(--navy);line-height:1;margin-bottom:2px;}
+.sb-sub{font-size:0.7rem;color:var(--navy);opacity:0.6;}
+.igrd{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
+.icard{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px;}
+.icard.grn{background:linear-gradient(135deg,#0d2e26,#0a2020);border-color:rgba(0,201,167,0.2);}
+.ic-head{font-size:0.6rem;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.icard.grn .ic-head{color:var(--teal);}
+.ic-row{margin-bottom:6px;}
+.ic-sub{font-size:0.62rem;color:var(--muted);margin-bottom:1px;}
+.ic-val{font-size:1.1rem;font-weight:700;color:var(--text);}
+.icard.grn .ic-val{color:var(--teal);}
+.srow{background:var(--surface);border:1px solid rgba(245,158,11,0.18);border-radius:10px;padding:12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:8px;}
+.sri{text-align:center;flex:1;}
+.sri .sr-lbl{font-size:0.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;}
+.sri .sr-val{font-size:1.15rem;font-weight:700;color:var(--amber);}
+.sdiv{width:1px;height:32px;background:var(--border);flex-shrink:0;}
+.bwrap{display:flex;align-items:flex-end;gap:16px;height:120px;margin-bottom:6px;}
+.bitem{flex:1;display:flex;flex-direction:column;align-items:center;}
+.bfill{width:100%;border-radius:5px 5px 0 0;min-height:5px;transition:height 0.4s ease;}
+.bfill.std{background:linear-gradient(to top,#4a5fc4,#667eea);}
+.bfill.off{background:linear-gradient(to top,#059669,#10b981);}
+.bamt{font-size:0.65rem;font-weight:700;color:var(--text);margin-bottom:3px;white-space:nowrap;}
+.blbl{font-size:0.65rem;color:var(--muted);margin-top:4px;}
+.cblock{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:13px;margin-bottom:12px;}
+.cblock h3{font-size:0.85rem;font-weight:700;color:var(--teal2);margin-bottom:2px;}
+.cblock p{font-size:0.68rem;color:var(--muted);margin-bottom:10px;}
+.cleg{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;font-size:0.67rem;color:var(--muted);}
+.cleg span{display:flex;align-items:center;gap:5px;}
+.ll{width:14px;height:2px;border-radius:2px;}
+.ibox{background:rgba(245,158,11,0.07);border-left:3px solid var(--amber);border-radius:7px;padding:10px 12px;font-size:0.75rem;color:var(--muted);line-height:1.5;margin-bottom:12px;}
+.ibox strong{color:var(--amber);}
+.fcabox{background:rgba(239,68,68,0.05);border:1px solid rgba(239,68,68,0.18);border-radius:10px;padding:12px;font-size:0.68rem;color:var(--muted);line-height:1.5;margin-bottom:12px;}
+.fcabox strong{color:#f87171;display:block;margin-bottom:4px;}
+.evcard{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:12px;margin-bottom:9px;border-left:3px solid var(--teal);}
+.evcard.withdrawal{border-left-color:var(--red);}
+.evrow{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
+.evrow:last-child{margin-bottom:0;}
+.evf label{font-size:0.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:3px;}
+.evf select,.evf input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:-apple-system,sans-serif;font-size:0.85rem;padding:9px;outline:none;-webkit-appearance:none;}
+.evf select option{background:var(--navy2);}
+.evdel{background:none;border:1px solid var(--red);color:var(--red);border-radius:7px;padding:7px 12px;font-size:0.75rem;cursor:pointer;}
+.btnadd{width:100%;padding:12px;background:transparent;border:1px dashed var(--teal);color:var(--teal);border-radius:10px;font-size:0.85rem;font-weight:600;cursor:pointer;margin-top:3px;}
+.tlitem{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);}
+.tlitem:last-child{border-bottom:none;}
+.tldot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.tldot.deposit{background:var(--teal);}
+.tldot.withdrawal{background:var(--red);}
+.tlinf{flex:1;}
+.tldate{font-size:0.68rem;color:var(--muted);}
+.tldesc{font-size:0.8rem;color:var(--text);font-weight:500;}
+.tlamt{font-size:0.9rem;font-weight:700;}
+.tlamt.pos{color:var(--teal);}
+.tlamt.neg{color:var(--red);}
+</style>
+</head>
+<body>
+<div id="app">
+<div id="topbar">
+  <div><h1>💰 Offset Calculator</h1><div class="sub">Illustrative only · Not financial advice</div></div>
+  <div class="pill" id="topSavings">Saved: £0</div>
+</div>
+<div id="tabnav">
+  <div class="tab active" data-p="inputs"><span class="ti">⚙️</span>Inputs</div>
+  <div class="tab" data-p="results"><span class="ti">📊</span>Results</div>
+  <div class="tab" data-p="charts"><span class="ti">📈</span>Charts</div>
+  <div class="tab" data-p="events"><span class="ti">📅</span>Events</div>
+</div>
+<div id="panels">
+  <div class="panel active" id="panel-inputs">
+    <div class="stitle">Mortgage Details</div>
+    <div class="ig"><label>Mortgage Amount</label><div class="irow"><span class="ipfx">£</span><input type="number" id="mortgageAmount" value="250000" min="10000" step="1000"></div></div>
+    <div class="ig"><label>Interest Rate</label><div class="irow"><span class="ipfx">%</span><input type="number" id="interestRate" value="4.5" min="0.1" max="15" step="0.1"></div></div>
+    <div class="ig"><label>Term (years)</label><div class="irow"><input type="number" id="term" value="25" min="1" max="40" step="1" style="padding-left:12px;"></div></div>
+    <div class="ig"><label>Mortgage Start Date</label><div class="irow"><input type="date" id="mortgageStartDate"></div></div>
+    <div class="stitle">Offset Savings</div>
+    <div class="swrap"><label>Initial Savings to Offset <span>£<span id="savingsDisplay">30,000</span></span></label><input type="range" id="savingsAmount" value="30000" min="0" max="200000" step="1000"></div>
+    <div class="ibox"><strong>💡 How it works:</strong> Your savings reduce the balance interest is charged on — without locking them away. Withdraw any time.</div>
+    <div class="fcabox"><strong>⚠️ YOUR HOME MAY BE REPOSSESSED IF YOU DO NOT KEEP UP REPAYMENTS ON YOUR MORTGAGE.</strong>This calculator is illustrative only and does not constitute financial advice. Always consult a qualified FCA-regulated adviser.</div>
+  </div>
+  <div class="panel" id="panel-results">
+    <div class="sbanner"><div class="sb-lbl">Total Interest Saved</div><div class="sb-amt" id="totalSavings">£0</div><div class="sb-sub">By offsetting your savings against your mortgage</div></div>
+    <div class="rgrid">
+      <div class="rcard"><div class="rc-lbl">Standard Monthly</div><div class="rc-val" id="standardPayment">£0</div><div class="rc-sub">Fixed repayment</div></div>
+      <div class="rcard acc"><div class="rc-lbl">Offset Monthly*</div><div class="rc-val" id="offsetPayment">£0</div><div class="rc-sub">*Initial, changes with events</div></div>
+      <div class="rcard"><div class="rc-lbl">Standard Interest</div><div class="rc-val" id="standardInterest">£0</div></div>
+      <div class="rcard acc"><div class="rc-lbl">Offset Interest</div><div class="rc-val" id="offsetInterest">£0</div></div>
+      <div class="rcard"><div class="rc-lbl">Standard Total</div><div class="rc-val" id="standardTotal">£0</div></div>
+      <div class="rcard acc"><div class="rc-lbl">Offset Total</div><div class="rc-val" id="offsetTotal">£0</div></div>
+    </div>
+    <div class="rgrid" style="grid-template-columns:1fr;"><div class="rcard"><div class="rc-lbl">Effective Balance (now)</div><div class="rc-val" id="effectiveBalance">£0</div><div class="rc-sub">Mortgage minus savings — what interest is charged on</div></div></div>
+    <div class="stitle">Daily & Monthly Interest</div>
+    <div class="igrd">
+      <div class="icard"><div class="ic-head">Standard</div><div class="ic-row"><div class="ic-sub">Daily</div><div class="ic-val" id="standardDailyInterest">£0</div></div><div class="ic-row"><div class="ic-sub">Monthly</div><div class="ic-val" id="standardMonthlyInterest">£0</div></div></div>
+      <div class="icard grn"><div class="ic-head">Offset</div><div class="ic-row"><div class="ic-sub">Daily</div><div class="ic-val" id="offsetDailyInterest">£0</div></div><div class="ic-row"><div class="ic-sub">Monthly</div><div class="ic-val" id="offsetMonthlyInterest">£0</div></div></div>
+    </div>
+    <div class="srow"><div class="sri"><div class="sr-lbl">Daily Saving</div><div class="sr-val" id="dailySavings">£0</div></div><div class="sdiv"></div><div class="sri"><div class="sr-lbl">Monthly Saving</div><div class="sr-val" id="monthlySavings">£0</div></div></div>
+    <div class="cblock"><h3>Total Interest Comparison</h3><div class="bwrap"><div class="bitem"><div class="bamt" id="standardBarAmt">£0</div><div class="bfill std" id="standardBar" style="height:100%;"></div><div class="blbl">Standard</div></div><div class="bitem"><div class="bamt" id="offsetBarAmt">£0</div><div class="bfill off" id="offsetBar" style="height:50%;"></div><div class="blbl">Offset</div></div></div></div>
+  </div>
+  <div class="panel" id="panel-charts">
+    <div class="cblock"><h3>Outstanding Balance Over Term</h3><p>How your mortgage balance reduces over time</p><canvas id="termChart"></canvas><div class="cleg"><span><span class="ll" style="background:#667eea;"></span>Standard</span><span><span class="ll" style="background:#10b981;"></span>Offset</span><span><span class="ll" style="background:#f59e0b;"></span>Savings</span></div></div>
+    <div class="cblock"><h3>Cumulative Interest Paid</h3><p>The gap between lines is your total interest saving</p><canvas id="interestChart"></canvas><div class="cleg"><span><span class="ll" style="background:#667eea;"></span>Standard</span><span><span class="ll" style="background:#10b981;"></span>Offset</span></div></div>
+  </div>
+  <div class="panel" id="panel-events">
+    <div class="stitle">Life Events</div>
+    <p style="font-size:0.75rem;color:var(--muted);margin-bottom:12px;">Add one-off or monthly deposits/withdrawals — e.g. inheritance, renovation, salary saving.</p>
+    <div id="eventsContainer"></div>
+    <button class="btnadd" id="addEventBtn">+ Add Life Event</button>
+    <div id="eventsTimeline" style="display:none;"><div class="stitle">Timeline</div><div id="eventsTimelineList"></div></div>
+  </div>
+</div>
+</div>
+<script>
+const $=id=>document.getElementById(id),fmt=n=>'£'+Math.round(n).toLocaleString('en-GB');
+const mAmt=$('mortgageAmount'),mRate=$('interestRate'),mTerm=$('term'),mSav=$('savingsAmount'),mDate=$('mortgageStartDate');
+let termChart=null,intChart=null,events=[],eid=0;
+mDate.valueAsDate=new Date();
+document.querySelectorAll('.tab').forEach(t=>{t.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));t.classList.add('active');$('panel-'+t.dataset.p).classList.add('active');if(t.dataset.p==='charts')buildCharts();});});
+function mp(P,r,y){const mr=r/100/12,n=y*12;if(!mr)return P/n;return P*(mr*Math.pow(1+mr,n))/(Math.pow(1+mr,n)-1);}
+function savAt(m,init){let s=init;const st=new Date(mDate.value);for(const ev of events){const em=Math.floor((new Date(ev.date)-st)/(1000*60*60*24*30.44));if(ev.freq==='once'){if(em<=m)s+=ev.type==='deposit'?ev.amt:-ev.amt;}else{if(em<=m)s+=(ev.type==='deposit'?1:-1)*ev.amt*(m-em+1);}}return Math.max(0,s);}
+function amort(P,r,y,payment){const mr=r/100/12,n=y*12;let bal=P,tot=0;const bals=[],ints=[],months=[];for(let m=0;m<=n;m++){bals.push(bal);ints.push(tot);months.push(m);if(m<n&&bal>0){const ip=bal*mr;bal=Math.max(0,bal-(payment-ip));tot+=ip;}}return{bals,ints,months};}
+function amortOff(P,r,y,init){const mr=r/100/12,n=y*12,pay=mp(P,r,y);let bal=P,tot=0;const bals=[],ints=[],savs=[],months=[];for(let m=0;m<=n;m++){bals.push(bal);ints.push(tot);savs.push(savAt(m,init));months.push(m);if(m<n&&bal>0){const eff=Math.max(0,bal-savAt(m,init)),ip=eff*mr;bal=Math.max(0,bal-(pay-ip));tot+=ip;}}return{bals,ints,savs,months};}
+function calc(){const P=parseFloat(mAmt.value)||0,r=parseFloat(mRate.value)||0,y=parseFloat(mTerm.value)||0,init=parseFloat(mSav.value)||0;
+$('savingsDisplay').textContent=init.toLocaleString('en-GB');
+const stdMp=mp(P,r,y),stdInt=stdMp*y*12-P,stdTot=P+stdInt,off=amortOff(P,r,y,init),offInt=off.ints[off.ints.length-1],offTot=P+offInt,effBal=Math.max(0,P-init),offMp=mp(effBal,r,y),saved=stdInt-offInt;
+$('topSavings').textContent='Saved: '+fmt(saved);$('totalSavings').textContent=fmt(saved);$('standardPayment').textContent=fmt(stdMp);$('offsetPayment').textContent=fmt(offMp)+'*';$('standardInterest').textContent=fmt(stdInt);$('offsetInterest').textContent=fmt(offInt);$('standardTotal').textContent=fmt(stdTot);$('offsetTotal').textContent=fmt(offTot);$('effectiveBalance').textContent=fmt(effBal);
+const dr=r/100/365,mr2=r/100/12;$('standardDailyInterest').textContent=fmt(P*dr);$('standardMonthlyInterest').textContent=fmt(P*mr2);$('offsetDailyInterest').textContent=fmt(effBal*dr);$('offsetMonthlyInterest').textContent=fmt(effBal*mr2);$('dailySavings').textContent=fmt((P-effBal)*dr);$('monthlySavings').textContent=fmt((P-effBal)*mr2);
+const mx=Math.max(stdInt,offInt,1);$('standardBar').style.height=(stdInt/mx*100)+'%';$('offsetBar').style.height=(offInt/mx*100)+'%';$('standardBarAmt').textContent=fmt(stdInt);$('offsetBarAmt').textContent=fmt(offInt);
+buildTimeline();if($('panel-charts').classList.contains('active'))buildCharts();}
+function buildCharts(){const P=parseFloat(mAmt.value)||0,r=parseFloat(mRate.value)||0,y=parseFloat(mTerm.value)||0,init=parseFloat(mSav.value)||0;
+const stdD=amort(P,r,y,mp(P,r,y)),offD=amortOff(P,r,y,init),lbs=stdD.months.map(m=>(m/12).toFixed(1)),st=new Date(mDate.value);
+const ann=events.map(ev=>{const ms=(new Date(ev.date)-st)/(1000*60*60*24*30.44);return{type:'line',xMin:ms/12,xMax:ms/12,borderColor:ev.type==='deposit'?'#10b981':'#ef4444',borderWidth:1,borderDash:[4,4],label:{display:true,content:(ev.type==='deposit'?'+':'-')+'£'+ev.amt.toLocaleString()+(ev.freq==='monthly'?'/mo':''),position:'start',backgroundColor:ev.type==='deposit'?'#10b981':'#ef4444',color:'#fff',font:{size:9},padding:3,borderRadius:3}};});
+const base={responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false},annotation:{annotations:ann},tooltip:{callbacks:{label:c=>c.dataset.label+': '+fmt(c.parsed.y)}}},scales:{x:{ticks:{color:'#8898aa',font:{size:9},callback(v){const yr=parseFloat(this.getLabelForValue(v));return yr%1===0?yr:'';}},grid:{color:'rgba(255,255,255,0.04)'},title:{display:true,text:'Years',color:'#8898aa',font:{size:9}}},y:{ticks:{color:'#8898aa',font:{size:9},callback:v=>'£'+(v/1000).toFixed(0)+'k'},grid:{color:'rgba(255,255,255,0.04)'},beginAtZero:true}}};
+if(termChart)termChart.destroy();termChart=new Chart($('termChart').getContext('2d'),{type:'line',data:{labels:lbs,datasets:[{label:'Standard',data:stdD.bals,borderColor:'#667eea',borderWidth:2,pointRadius:0,fill:false,tension:0.1},{label:'Offset',data:offD.bals,borderColor:'#10b981',borderWidth:2,pointRadius:0,fill:false,tension:0.1},{label:'Savings',data:offD.savs,borderColor:'#f59e0b',borderWidth:2,pointRadius:0,fill:false,tension:0.1,borderDash:[5,5]}]},options:{...base,interaction:{mode:'index',intersect:false}}});
+if(intChart)intChart.destroy();intChart=new Chart($('interestChart').getContext('2d'),{type:'line',data:{labels:lbs,datasets:[{label:'Standard',data:stdD.ints,borderColor:'#667eea',backgroundColor:'rgba(102,126,234,0.1)',borderWidth:2,pointRadius:0,fill:true,tension:0.1},{label:'Offset',data:offD.ints,borderColor:'#10b981',backgroundColor:'rgba(16,185,129,0.1)',borderWidth:2,pointRadius:0,fill:true,tension:0.1}]},options:base});}
+$('addEventBtn').addEventListener('click',()=>{const id=eid++;const def=new Date(mDate.value);def.setFullYear(def.getFullYear()+1);const ds=def.toISOString().split('T')[0];const card=document.createElement('div');card.className='evcard deposit';card.dataset.eid=id;card.innerHTML=`<div class="evrow"><div class="evf"><label>Type</label><select class="ev-type" data-id="${id}"><option value="deposit">Deposit</option><option value="withdrawal">Withdrawal</option></select></div><div class="evf"><label>Frequency</label><select class="ev-freq" data-id="${id}"><option value="once">One-time</option><option value="monthly">Monthly</option></select></div></div><div class="evrow"><div class="evf"><label>Date</label><input type="date" class="ev-date" value="${ds}" data-id="${id}"></div><div class="evf"><label>Amount (£)</label><input type="number" class="ev-amt" value="1000" min="0" step="100" data-id="${id}"></div></div><div class="evrow" style="grid-template-columns:1fr auto;"><div></div><button class="evdel ev-del" data-id="${id}">Remove</button></div>`;
+$('eventsContainer').appendChild(card);events.push({id,type:'deposit',date:ds,freq:'once',amt:1000});
+card.querySelector('.ev-type').addEventListener('change',e=>{const ev=events.find(x=>x.id===parseInt(e.target.dataset.id));ev.type=e.target.value;card.className='evcard '+e.target.value;calc();});
+card.querySelector('.ev-date').addEventListener('input',e=>{events.find(x=>x.id===parseInt(e.target.dataset.id)).date=e.target.value;calc();});
+card.querySelector('.ev-freq').addEventListener('change',e=>{events.find(x=>x.id===parseInt(e.target.dataset.id)).freq=e.target.value;calc();});
+card.querySelector('.ev-amt').addEventListener('input',e=>{events.find(x=>x.id===parseInt(e.target.dataset.id)).amt=parseFloat(e.target.value)||0;calc();});
+card.querySelector('.ev-del').addEventListener('click',e=>{events=events.filter(x=>x.id!==parseInt(e.target.dataset.id));card.remove();calc();});calc();});
+function buildTimeline(){const wrap=$('eventsTimeline'),list=$('eventsTimelineList');if(!events.length){wrap.style.display='none';return;}wrap.style.display='block';const sorted=[...events].sort((a,b)=>new Date(a.date)-new Date(b.date));list.innerHTML=sorted.map(ev=>{const d=new Date(ev.date).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});return`<div class="tlitem"><div class="tldot ${ev.type}"></div><div class="tlinf"><div class="tldate">${d} · ${ev.freq==='monthly'?'Monthly':'One-time'}</div><div class="tldesc">${ev.type==='deposit'?'Deposit':'Withdrawal'}</div></div><div class="tlamt ${ev.type==='deposit'?'pos':'neg'}">${ev.type==='deposit'?'+':'-'}£${ev.amt.toLocaleString()}${ev.freq==='monthly'?'/mo':''}</div></div>`;}).join('');}
+[mAmt,mRate,mTerm,mSav,mDate].forEach(el=>el.addEventListener('input',calc));calc();
+</script>
+</body>
+</html>
