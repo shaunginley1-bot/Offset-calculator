@@ -255,7 +255,7 @@ canvas{display:block;width:100%}
       <div class="card-title">Life Events</div>
       <p style="font-size:12px;color:#7a8499;margin-bottom:14px;line-height:1.6">Add events that change your offset savings or overpayments. Change events can have a stop date.</p>
       <div class="draw-info">
-        Drawable: Lump Sum IN/OUT and Monthly Savings changes affect offset accounts - money stays accessible.<br>
+        Drawable: Lump Sum IN/OUT, Monthly Withdrawals and Monthly Savings changes affect offset accounts - money stays accessible.<br>
         Non-drawable: Monthly Overpayment changes go directly off mortgage capital - cannot be recovered.<br>
         Rate Change: Applied from the date specified onwards.
       </div>
@@ -302,6 +302,7 @@ var eid = 0;
 var pid = 1;
 var calcRes = null;
 
+function ym(d){ return d.getFullYear()*12 + d.getMonth(); }
 function f(v){ return '£' + Math.round(v).toLocaleString('en-GB'); }
 function f2(v){ return '£' + Number(v).toFixed(2); }
 
@@ -493,6 +494,7 @@ function setEvtField(id, field, val) {
 function evtTitle(t) {
   if (t === 'lump_in') return 'Lump Sum IN';
   if (t === 'lump_out') return 'Lump Sum OUT';
+  if (t === 'regular_out') return 'Monthly Withdrawal';
   if (t === 'change_saving') return 'Change Monthly Savings';
   if (t === 'change_overpayment') return 'Change Monthly Overpayment';
   return 'Rate Change';
@@ -504,8 +506,8 @@ function renderEvents() {
   for (var i = 0; i < evts.length; i++) {
     var ev = evts[i];
     var isRate = ev.type === 'rate_change';
-    var hasStop = ev.type === 'change_saving' || ev.type === 'change_overpayment';
-    var showPot = (ev.type === 'lump_in' || ev.type === 'lump_out' || ev.type === 'change_saving') && pots.length > 1;
+    var hasStop = ev.type === 'change_saving' || ev.type === 'change_overpayment' || ev.type === 'regular_out';
+    var showPot = (ev.type === 'lump_in' || ev.type === 'lump_out' || ev.type === 'regular_out' || ev.type === 'change_saving') && pots.length > 1;
     var potOpts = '';
     if (showPot) {
       for (var j = 0; j < pots.length; j++) {
@@ -519,6 +521,7 @@ function renderEvents() {
         '<div class="field" style="margin-bottom:0"><label>Event Type</label><select onchange="setEvtField(' + ev.id + ',\'type\',this.value)">' +
           '<option value="lump_in"' + (ev.type==='lump_in'?' selected':'') + '>Lump Sum IN</option>' +
           '<option value="lump_out"' + (ev.type==='lump_out'?' selected':'') + '>Lump Sum OUT</option>' +
+          '<option value="regular_out"' + (ev.type==='regular_out'?' selected':'') + '>Monthly Withdrawal</option>' +
           '<option value="change_saving"' + (ev.type==='change_saving'?' selected':'') + '>Change Monthly Savings</option>' +
           '<option value="change_overpayment"' + (ev.type==='change_overpayment'?' selected':'') + '>Change Monthly Overpayment</option>' +
           '<option value="rate_change"' + (ev.type==='rate_change'?' selected':'') + '>Rate Change</option>' +
@@ -529,7 +532,7 @@ function renderEvents() {
         '<div class="field"><label>New Annual Rate (%)</label><div class="iw"><input type="number" inputmode="decimal" value="' + (ev.amt||'') + '" placeholder="e.g. 6.25" min="0.01" max="30" step="0.01" style="padding-right:28px" onfocus="this.select()" oninput="setEvtField(' + ev.id + ',\'amt\',this.value)"><span class="suf">%</span></div><div class="hint">Applied from this date onwards</div></div>' :
         '<div class="field"><label>Amount</label><div class="iw"><span class="pre">£</span><input type="number" inputmode="decimal" value="' + (ev.amt||'') + '" placeholder="Enter amount" min="0" onfocus="this.select()" oninput="setEvtField(' + ev.id + ',\'amt\',this.value)" style="font-size:16px"></div></div>'
       ) +
-      (hasStop ? '<div class="field"><label>Stop Date (leave blank for permanent)</label><input type="date" value="' + (ev.stopdate||'') + '" style="font-family:monospace;color-scheme:dark" onchange="setEvtField(' + ev.id + ',\'stopdate\',this.value)"></div>' : '') +
+      (hasStop ? '<div class="field"><label>Stop Date (leave blank for permanent)</label><input type="date" value="' + (ev.stopdate||'') + '" style="font-family:monospace;color-scheme:dark" onchange="setEvtField(' + ev.id + ',\'stopdate\',this.value)">' + (ev.type==='regular_out' ? '<div class="hint">First month with no withdrawal</div>' : '') + '</div>' : '') +
     '</div>';
   }
   el.innerHTML = html;
@@ -643,9 +646,22 @@ function calculate() {
       if (!ev.date) continue;
       var ed = new Date(ev.date);
       var isAct = ed.getFullYear()===cd.getFullYear() && ed.getMonth()===cd.getMonth();
+      if (ev.type === 'regular_out') {
+        var rStarted = ym(ed) <= ym(cd);
+        var rStopped = ev.stopdate && ym(new Date(ev.stopdate)) <= ym(cd);
+        var rStopAct = ev.stopdate && new Date(ev.stopdate).getFullYear()===cd.getFullYear() && new Date(ev.stopdate).getMonth()===cd.getMonth();
+        if (rStarted && !rStopped && +ev.amt > 0) {
+          var rpi = ev.potId ? pots.findIndex(function(p){ return p.id==ev.potId; }) : 0;
+          var ridx = rpi >= 0 ? rpi : 0;
+          if (pots[ridx] && pots[ridx].potType === 'equity') { if (isAct) el = 'Cannot withdraw from equity pot'; }
+          else { potBals[ridx] = Math.max(0, potBals[ridx] - +ev.amt); if (isAct) el = 'Withdraw ' + f(+ev.amt) + '/mo (' + (pots[ridx]?pots[ridx].name:'Pot') + ')'; }
+        }
+        if (rStopAct) el = 'Withdrawals stopped';
+        continue;
+      }
       if (ev.type === 'change_saving' || ev.type === 'change_overpayment') {
-        var started = ed <= cd;
-        var stopped = ev.stopdate && new Date(ev.stopdate) <= cd;
+        var started = ym(ed) <= ym(cd);
+        var stopped = ev.stopdate && ym(new Date(ev.stopdate)) <= ym(cd);
         if (started && !stopped) {
           if (ev.type === 'change_saving' && +ev.amt >= 0) {
             var pi = ev.potId ? pots.findIndex(function(p){ return p.id===ev.potId; }) : 0;
@@ -658,7 +674,7 @@ function calculate() {
         continue;
       }
       if (ev.type === 'rate_change') {
-        if (ed <= cd && +ev.amt > 0) { curDr = +ev.amt/100/365; if (isAct) el = 'Rate ' + (+ev.amt).toFixed(2) + '%'; }
+        if (ym(ed) <= ym(cd) && +ev.amt > 0) { curDr = +ev.amt/100/365; if (isAct) el = 'Rate ' + (+ev.amt).toFixed(2) + '%'; }
         continue;
       }
       if (!+ev.amt || +ev.amt <= 0) continue;
@@ -807,7 +823,7 @@ function calculate() {
   document.getElementById('btn-pdf').style.display = 'inline-block';
   document.getElementById('btn-email').style.display = 'inline-block';
 
-  var evTypeLabel = {'lump_in':'Lump Sum IN','lump_out':'Lump Sum OUT','change_saving':'Change Monthly Savings','change_overpayment':'Change Monthly Overpayment','rate_change':'Rate Change'};
+  var evTypeLabel = {'lump_in':'Lump Sum IN','lump_out':'Lump Sum OUT','regular_out':'Monthly Withdrawal','change_saving':'Change Monthly Savings','change_overpayment':'Change Monthly Overpayment','rate_change':'Rate Change'};
   var printEvHtml = '';
   var validEvts = evts.filter(function(e){ return e.date; });
   if (!validEvts.length) {
@@ -853,12 +869,12 @@ function doEmail() {
     'LIFE EVENTS\n===========\n' + (function(){
       if (!evts.length) return 'None.\n';
       var lines = '';
-      var etl = {lump_in:'Lump Sum IN',lump_out:'Lump Sum OUT',change_saving:'Change Monthly Savings',change_overpayment:'Change Monthly Overpayment',rate_change:'Rate Change'};
+      var etl = {lump_in:'Lump Sum IN',lump_out:'Lump Sum OUT',regular_out:'Monthly Withdrawal',change_saving:'Change Monthly Savings',change_overpayment:'Change Monthly Overpayment',rate_change:'Rate Change'};
       for (var i=0;i<evts.length;i++){
         var e=evts[i];
         if(!e.date) continue;
         var det = e.type==='rate_change' ? (e.amt||'-')+'%' : (e.amt?f(+e.amt):'-');
-        var stop = (e.type==='change_saving'||e.type==='change_overpayment') ? (e.stopdate?(' to '+e.stopdate):'(permanent)') : '';
+        var stop = (e.type==='change_saving'||e.type==='change_overpayment'||e.type==='regular_out') ? (e.stopdate?(' to '+e.stopdate):'(permanent)') : '';
         lines += (etl[e.type]||e.type) + ': ' + det + ' from ' + e.date + stop + '\n';
       }
       return lines || 'None.\n';
@@ -945,12 +961,12 @@ function makePdf() {
       ['Whole term', money(r.sti), money(r.toi), money(r.saving)]
     ], columnStyles:{1:{halign:'right'},2:{halign:'right'},3:{halign:'right'}}});
   y = doc.lastAutoTable.finalY + 6;
-  var etl = {lump_in:'Lump sum in',lump_out:'Lump sum out',change_saving:'Change monthly savings',change_overpayment:'Change monthly overpayment',rate_change:'Rate change'};
+  var etl = {lump_in:'Lump sum in',lump_out:'Lump sum out',regular_out:'Monthly withdrawal',change_saving:'Change monthly savings',change_overpayment:'Change monthly overpayment',rate_change:'Rate change'};
   var ev = evts.filter(function(e){ return e.date; });
   if (ev.length) {
     doc.autoTable({startY:y, margin:{left:L,right:L}, theme:'grid', headStyles:head, styles:{fontSize:9},
       head:[['Life event date','Event','Detail','Stop date']],
-      body:ev.map(function(e){ return [new Date(e.date).toLocaleDateString('en-GB'), etl[e.type]||e.type, e.type==='rate_change'?(e.amt||'-')+'%':(e.amt?money(+e.amt):'-'), (e.type==='change_saving'||e.type==='change_overpayment')?(e.stopdate?new Date(e.stopdate).toLocaleDateString('en-GB'):'Permanent'):'-']; })});
+      body:ev.map(function(e){ return [new Date(e.date).toLocaleDateString('en-GB'), etl[e.type]||e.type, e.type==='rate_change'?(e.amt||'-')+'%':(e.amt?money(+e.amt):'-'), (e.type==='change_saving'||e.type==='change_overpayment'||e.type==='regular_out')?(e.stopdate?new Date(e.stopdate).toLocaleDateString('en-GB'):'Permanent'):'-']; })});
     y = doc.lastAutoTable.finalY + 6;
   }
   if (r.hasEq) {
