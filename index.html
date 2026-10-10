@@ -1,197 +1,1002 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
 <title>Offset Mortgage Calculator</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.2.1"></script>
 <style>
-:root{--navy:#0f1b2d;--navy2:#162033;--teal:#00c9a7;--teal2:#00e5c0;--amber:#f59e0b;--red:#ef4444;--surface:#1a2740;--surface2:#223050;--border:rgba(255,255,255,0.07);--text:#e8edf5;--muted:#8898aa;}
-*{margin:0;padding:0;box-sizing:border-box;}
-html,body{width:100%;height:100%;overflow:hidden;background:var(--navy);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%;text-size-adjust:100%;}
-#app{display:flex;flex-direction:column;width:100vw;width:100%;height:100vh;height:100dvh;min-height:-webkit-fill-available;}
-#topbar{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:12px 16px;padding-top:max(12px,env(safe-area-inset-top));background:var(--navy);border-bottom:1px solid var(--border);}
-#topbar h1{font-size:1.1rem;font-weight:700;color:var(--teal);}
-#topbar .sub{font-size:0.6rem;color:var(--muted);}
-.pill{background:var(--teal);color:var(--navy);font-weight:700;font-size:0.7rem;padding:5px 12px;border-radius:50px;white-space:nowrap;}
-#tabnav{flex-shrink:0;display:flex;background:var(--navy2);border-bottom:1px solid var(--border);}
-.tab{flex:1;padding:9px 4px;text-align:center;font-size:0.65rem;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;-webkit-user-select:none;}
-.tab.active{color:var(--teal);border-bottom-color:var(--teal);}
-.ti{font-size:0.95rem;display:block;margin-bottom:1px;}
-#panels{flex:1;overflow:hidden;position:relative;}
-.panel{position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 14px max(20px,env(safe-area-inset-bottom));display:none;}
-.panel.active{display:block;}
-.stitle{font-size:0.9rem;font-weight:700;color:var(--teal2);margin:16px 0 9px;}
-.stitle:first-child{margin-top:2px;}
-.ig{margin-bottom:12px;}
-.ig label{display:block;font-size:0.65rem;font-weight:600;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em;}
-.irow{display:flex;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:9px;overflow:hidden;}
-.ipfx{padding:0 10px;color:var(--muted);font-size:0.9rem;font-weight:600;flex-shrink:0;}
-.irow input[type=number],.irow input[type=date]{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-size:1rem;font-weight:500;padding:12px 10px 12px 0;width:100%;-webkit-appearance:none;}
-.irow input[type=date]{padding-left:10px;}
-.irow input[type=date]::-webkit-calendar-picker-indicator{filter:invert(0.5);margin-right:6px;}
-.swrap{margin-bottom:12px;}
-.swrap label{display:flex;justify-content:space-between;align-items:baseline;font-size:0.65rem;font-weight:600;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em;}
-.swrap label span{font-size:1rem;font-weight:700;color:var(--teal);text-transform:none;letter-spacing:0;}
-input[type=range]{-webkit-appearance:none;width:100%;height:6px;background:var(--surface2);border-radius:3px;outline:none;}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;background:var(--teal);border-radius:50%;cursor:pointer;box-shadow:0 2px 8px rgba(0,201,167,0.4);}
-.rgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
-.rcard{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px;}
-.rcard.acc{background:linear-gradient(135deg,#0d2e26,#0a2020);border-color:rgba(0,201,167,0.22);}
-.rc-lbl{font-size:0.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;}
-.rc-val{font-size:1.25rem;font-weight:700;color:var(--text);line-height:1;}
-.rcard.acc .rc-val{color:var(--teal);}
-.rc-sub{font-size:0.6rem;color:var(--muted);margin-top:3px;}
-.sbanner{background:var(--teal);border-radius:14px;padding:16px;text-align:center;margin-bottom:10px;}
-.sb-lbl{font-size:0.65rem;color:var(--navy);font-weight:700;opacity:0.7;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:2px;}
-.sb-amt{font-size:2.2rem;font-weight:700;color:var(--navy);line-height:1;margin-bottom:2px;}
-.sb-sub{font-size:0.7rem;color:var(--navy);opacity:0.6;}
-.igrd{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
-.icard{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px;}
-.icard.grn{background:linear-gradient(135deg,#0d2e26,#0a2020);border-color:rgba(0,201,167,0.2);}
-.ic-head{font-size:0.6rem;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
-.icard.grn .ic-head{color:var(--teal);}
-.ic-row{margin-bottom:6px;}
-.ic-sub{font-size:0.62rem;color:var(--muted);margin-bottom:1px;}
-.ic-val{font-size:1.1rem;font-weight:700;color:var(--text);}
-.icard.grn .ic-val{color:var(--teal);}
-.srow{background:var(--surface);border:1px solid rgba(245,158,11,0.18);border-radius:10px;padding:12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:8px;}
-.sri{text-align:center;flex:1;}
-.sri .sr-lbl{font-size:0.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;}
-.sri .sr-val{font-size:1.15rem;font-weight:700;color:var(--amber);}
-.sdiv{width:1px;height:32px;background:var(--border);flex-shrink:0;}
-.bwrap{display:flex;align-items:flex-end;gap:16px;height:120px;margin-bottom:6px;}
-.bitem{flex:1;display:flex;flex-direction:column;align-items:center;}
-.bfill{width:100%;border-radius:5px 5px 0 0;min-height:5px;transition:height 0.4s ease;}
-.bfill.std{background:linear-gradient(to top,#4a5fc4,#667eea);}
-.bfill.off{background:linear-gradient(to top,#059669,#10b981);}
-.bamt{font-size:0.65rem;font-weight:700;color:var(--text);margin-bottom:3px;white-space:nowrap;}
-.blbl{font-size:0.65rem;color:var(--muted);margin-top:4px;}
-.cblock{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:13px;margin-bottom:12px;}
-.cblock h3{font-size:0.85rem;font-weight:700;color:var(--teal2);margin-bottom:2px;}
-.cblock p{font-size:0.68rem;color:var(--muted);margin-bottom:10px;}
-.cleg{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;font-size:0.67rem;color:var(--muted);}
-.cleg span{display:flex;align-items:center;gap:5px;}
-.ll{width:14px;height:2px;border-radius:2px;}
-.ibox{background:rgba(245,158,11,0.07);border-left:3px solid var(--amber);border-radius:7px;padding:10px 12px;font-size:0.75rem;color:var(--muted);line-height:1.5;margin-bottom:12px;}
-.ibox strong{color:var(--amber);}
-.fcabox{background:rgba(239,68,68,0.05);border:1px solid rgba(239,68,68,0.18);border-radius:10px;padding:12px;font-size:0.68rem;color:var(--muted);line-height:1.5;margin-bottom:12px;}
-.fcabox strong{color:#f87171;display:block;margin-bottom:4px;}
-.evcard{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:12px;margin-bottom:9px;border-left:3px solid var(--teal);}
-.evcard.withdrawal{border-left-color:var(--red);}
-.evrow{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
-.evrow:last-child{margin-bottom:0;}
-.evf label{font-size:0.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:3px;}
-.evf select,.evf input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:-apple-system,sans-serif;font-size:0.85rem;padding:9px;outline:none;-webkit-appearance:none;}
-.evf select option{background:var(--navy2);}
-.evdel{background:none;border:1px solid var(--red);color:var(--red);border-radius:7px;padding:7px 12px;font-size:0.75rem;cursor:pointer;}
-.btnadd{width:100%;padding:12px;background:transparent;border:1px dashed var(--teal);color:var(--teal);border-radius:10px;font-size:0.85rem;font-weight:600;cursor:pointer;margin-top:3px;}
-.tlitem{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);}
-.tlitem:last-child{border-bottom:none;}
-.tldot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
-.tldot.deposit{background:var(--teal);}
-.tldot.withdrawal{background:var(--red);}
-.tlinf{flex:1;}
-.tldate{font-size:0.68rem;color:var(--muted);}
-.tldesc{font-size:0.8rem;color:var(--text);font-weight:500;}
-.tlamt{font-size:0.9rem;font-weight:700;}
-.tlamt.pos{color:var(--teal);}
-.tlamt.neg{color:var(--red);}
+*{box-sizing:border-box;margin:0;padding:0}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);background:#0b0d12}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+html,body{height:100%;background:#0b0d12;color:#e2e8f0;font-family:-apple-system,sans-serif;font-size:14px}
+#app{display:flex;flex-direction:column;height:100%}
+.fca{background:#1a1300;border-bottom:1px solid #5a3d00;padding:7px 14px;font-size:10px;color:#c8a840;flex-shrink:0}
+.fca b{color:#f5a623}
+.hdr{background:#13161f;border-bottom:1px solid #252a38;padding:10px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.hdr-ico{width:30px;height:30px;background:linear-gradient(135deg,#00d4aa,#4f8ef7);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.hdr-t{font-weight:700;font-size:14px}
+.hdr-s{font-size:10px;color:#7a8499}
+.tabs{background:#13161f;border-bottom:1px solid #252a38;display:flex;overflow-x:auto;flex-shrink:0}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex-shrink:0;padding:12px 18px;background:none;border:none;border-bottom:2px solid transparent;color:#7a8499;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit}
+.tab.active{color:#00d4aa;border-bottom-color:#00d4aa}
+.body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px}
+.panel{display:none}
+.panel.active{display:block}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:580px){.grid{grid-template-columns:1fr}}
+.card{background:#13161f;border:1px solid #252a38;border-radius:10px;padding:16px;margin-bottom:14px;overflow-x:auto}
+.card-title{font-size:10px;color:#7a8499;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px}
+.field{margin-bottom:13px}
+.field label{display:block;font-size:11px;color:#7a8499;margin-bottom:6px;font-weight:500}
+.field .hint{font-size:10px;color:#7a8499;margin-top:3px}
+.iw{position:relative}
+.iw .pre{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#7a8499;font-size:13px;pointer-events:none}
+.iw .suf{position:absolute;right:10px;top:50%;transform:translateY(-50%);color:#7a8499;font-size:13px;pointer-events:none}
+input,select{width:100%;background:#0b0d12;border:1px solid #252a38;border-radius:6px;color:#e2e8f0;padding:10px 12px;font-size:16px;font-family:monospace;outline:none;-webkit-appearance:none}
+input:focus,select:focus{border-color:#00d4aa}
+.iw input{padding-left:22px}
+.iw input.suf{padding-right:28px}
+.btn{width:100%;background:linear-gradient(135deg,#00d4aa,#00b894);border:none;border-radius:8px;color:#0a2418;padding:13px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:8px}
+.btn-add{width:100%;background:rgba(79,142,247,.08);border:1px dashed rgba(79,142,247,.4);border-radius:8px;color:#4f8ef7;padding:12px;cursor:pointer;font-size:13px;font-family:inherit;margin-bottom:14px}
+.hl{background:linear-gradient(135deg,rgba(0,212,170,.09),rgba(79,142,247,.06));border:1px solid rgba(0,212,170,.25);border-radius:10px;padding:16px 18px;margin-bottom:14px}
+.hl-l{font-size:10px;color:#7a8499;text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px}
+.hl-v{font-size:30px;font-weight:800;color:#00d4aa;font-family:monospace;line-height:1}
+.hl-s{font-size:11px;color:#7a8499;margin-top:4px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+@media(max-width:480px){.stats{grid-template-columns:1fr 1fr}}
+.stat{background:#1a1e2a;border:1px solid #252a38;border-radius:8px;padding:12px 14px}
+.stat-l{font-size:10px;color:#7a8499;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+.stat-v{font-size:18px;font-weight:700;font-family:monospace}
+.stat-s{font-size:10px;color:#7a8499;margin-top:3px}
+.dates{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.datebox{background:#13161f;border:1px solid #252a38;border-radius:8px;padding:14px}
+.datebox-l{font-size:10px;color:#7a8499;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+.datebox-v{font-size:15px;font-weight:700;font-family:monospace}
+.datebox-s{font-size:10px;color:#7a8499;margin-top:3px}
+table{width:100%;border-collapse:collapse;font-family:monospace;font-size:12px}
+th{text-align:left;padding:5px 8px;color:#7a8499;font-size:10px;border-bottom:1px solid #252a38;background:#1a1e2a}
+td{padding:6px 8px;border-bottom:1px solid rgba(37,42,56,.5)}
+.tr{text-align:right}
+.green{color:#00d4aa}.blue{color:#4f8ef7}.orange{color:#f5a623}.red{color:#e8445a}
+.sched-wrap{max-height:280px;overflow:auto;-webkit-overflow-scrolling:touch;border:1px solid #252a38;border-radius:6px}
+.sched-wrap th{position:sticky;top:0}
+.evrow td:first-child{color:#f5a623}
+.warn{background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.25);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:11px;color:#f5a623;display:none}
+.eq-warn{background:rgba(232,68,90,.08);border:2px solid rgba(232,68,90,.5);border-radius:8px;padding:12px 16px;margin-bottom:14px;display:none}
+.eq-warn-t{font-size:12px;font-weight:700;color:#e8445a;margin-bottom:6px}
+.eq-warn-b{font-size:11px;color:#e8445a;line-height:1.7}
+.eq-box{background:rgba(232,68,90,.08);border:2px solid rgba(232,68,90,.5);border-radius:8px;padding:10px 12px;margin-bottom:13px;font-size:10px;color:#e8445a;line-height:1.6}
+.pot-card{border-radius:10px;padding:16px;margin-bottom:14px;border:1px solid #252a38;background:#13161f}
+.pot-card.equity{background:#1a0f0f;border:2px solid rgba(232,68,90,.4)}
+.pot-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:13px}
+.pot-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em}
+.pot-rm{background:rgba(232,68,90,.12);border:1px solid rgba(232,68,90,.3);border-radius:5px;color:#e8445a;padding:4px 10px;cursor:pointer;font-size:11px;font-family:inherit}
+.draw-info{background:rgba(0,212,170,.06);border:1px solid rgba(0,212,170,.2);border-radius:7px;padding:10px 12px;margin-bottom:14px;font-size:11px;color:#00d4aa;line-height:1.7}
+.ev-card{background:#1a1e2a;border:1px solid #252a38;border-radius:8px;padding:14px;margin-bottom:12px}
+.ev-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.ev-title{font-size:12px;font-weight:600;color:#e2e8f0}
+.ev-rm{background:rgba(232,68,90,.15);border:1px solid rgba(232,68,90,.4);border-radius:6px;color:#e8445a;padding:6px 14px;cursor:pointer;font-size:12px;font-family:inherit}
+.ch-box{background:#1a1e2a;border:1px solid #252a38;border-radius:8px;padding:12px;margin-bottom:14px}
+.ch-t{font-size:10px;color:#7a8499;text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px}
+canvas{display:block;width:100%}
+.ph{text-align:center;padding:50px 20px;color:#7a8499;font-size:13px}
+.hbtn{border:none;border-radius:6px;padding:6px 10px;cursor:pointer;font-size:11px;font-family:inherit;flex-shrink:0}
+.panel-bar{background:#1a1e2a;border-bottom:1px solid #252a38;padding:14px;flex-shrink:0;display:none}
+.panel-bar.open{display:block}
+.scen-row{display:flex;align-items:center;gap:8px;background:#13161f;border:1px solid #252a38;border-radius:6px;padding:8px 12px;margin-bottom:6px}
+@media print {
+  body { background: #fff !important; color: #000 !important; font-size: 11pt; }
+  #app { height: auto !important; overflow: visible !important; }
+  .fca { background: #fff3cd !important; color: #856404 !important; border: 1px solid #ffc107 !important; padding: 6px 10px; font-size: 8pt; }
+  .hdr { background: #f8f9fa !important; border-bottom: 2px solid #dee2e6 !important; }
+  .hdr-ico { background: #dee2e6 !important; }
+  .hdr-t { color: #000 !important; }
+  .hdr-s { color: #666 !important; }
+  .tabs, .panel-bar, #btn-pdf, #btn-email, .hbtn { display: none !important; }
+  .panel { display: none !important; }
+  #panel-results { display: block !important; }
+  #print-life-events { display: block !important; }
+  .body { overflow: visible !important; padding: 0 !important; }
+  .card { background: #f8f9fa !important; border: 1px solid #dee2e6 !important; break-inside: avoid; }
+  .card-title { color: #495057 !important; }
+  .hl { background: #d4edda !important; border-color: #28a745 !important; }
+  .hl-v { color: #155724 !important; }
+  .hl-l, .hl-s { color: #155724 !important; }
+  .stat { background: #f8f9fa !important; border: 1px solid #dee2e6 !important; }
+  .stat-l { color: #495057 !important; }
+  .stat-v { color: #000 !important; }
+  .stat-v.green { color: #155724 !important; }
+  .stat-v.blue { color: #004085 !important; }
+  .stat-v.orange { color: #856404 !important; }
+  .datebox { background: #f8f9fa !important; border: 1px solid #dee2e6 !important; }
+  .datebox-l { color: #495057 !important; }
+  .datebox-v { color: #000 !important; }
+  .datebox-v.green { color: #155724 !important; }
+  table { font-size: 9pt; }
+  th { background: #e9ecef !important; color: #495057 !important; }
+  td { color: #000 !important; border-bottom: 1px solid #dee2e6 !important; }
+  .green { color: #155724 !important; }
+  .blue { color: #004085 !important; }
+  .orange { color: #856404 !important; }
+  .red { color: #721c24 !important; }
+  .warn { background: #fff3cd !important; border-color: #ffc107 !important; color: #856404 !important; }
+  .eq-warn { background: #f8d7da !important; border-color: #f5c6cb !important; }
+  .eq-warn-t, .eq-warn-b { color: #721c24 !important; }
+  .sched-wrap { max-height: none !important; overflow: visible !important; }
+  .grid { grid-template-columns: 1fr 1fr !important; }
+  .ch-box canvas { display: none !important; }
+  .ch-box { display: none !important; }
+}
 </style>
 </head>
 <body>
 <div id="app">
-<div id="topbar">
-  <div><h1>💰 Offset Calculator</h1><div class="sub">Illustrative only · Not financial advice</div></div>
-  <div class="pill" id="topSavings">Saved: £0</div>
+
+<div class="fca"><b>Important:</b> Illustrative purposes only. Not financial advice. Always consult an FCA-authorised mortgage adviser. Your home may be repossessed if you do not keep up repayments.</div>
+
+<div class="hdr">
+  <div class="hdr-ico">+</div>
+  <div style="flex:1">
+    <div class="hdr-t">Offset Mortgage Calculator</div>
+    <div class="hdr-s">Interest savings projector</div>
+  </div>
+  <button class="hbtn" style="background:rgba(79,142,247,.12);border:1px solid rgba(79,142,247,.3);color:#4f8ef7" onclick="toggleBar('bar-scen')">Scenarios</button>
+  <button class="hbtn" style="background:rgba(245,166,35,.12);border:1px solid rgba(245,166,35,.3);color:#f5a623" onclick="toggleBar('bar-brand')">Brand</button>
+  <button id="btn-pdf" class="hbtn" style="background:rgba(0,212,170,.12);border:1px solid rgba(0,212,170,.3);color:#00d4aa;display:none" onclick="makePdf()">PDF</button>
+  <button id="btn-email" class="hbtn" style="background:rgba(79,142,247,.12);border:1px solid rgba(79,142,247,.3);color:#4f8ef7;display:none" onclick="doEmail()">Email</button>
 </div>
-<div id="tabnav">
-  <div class="tab active" data-p="inputs"><span class="ti">⚙️</span>Inputs</div>
-  <div class="tab" data-p="results"><span class="ti">📊</span>Results</div>
-  <div class="tab" data-p="charts"><span class="ti">📈</span>Charts</div>
-  <div class="tab" data-p="events"><span class="ti">📅</span>Events</div>
+
+<div class="panel-bar" id="bar-brand">
+  <div style="font-size:10px;color:#7a8499;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Brand Settings</div>
+  <div class="grid">
+    <div class="field"><label>Adviser Name</label><input type="text" id="b-adviser" placeholder="e.g. John Smith" oninput="saveBrand()"></div>
+    <div class="field"><label>Company</label><input type="text" id="b-company" placeholder="e.g. Smith Mortgages" oninput="saveBrand()"></div>
+    <div class="field"><label>Contact</label><input type="text" id="b-contact" placeholder="e.g. 0161 123 4567" oninput="saveBrand()"></div>
+    <div class="field"><label>Tagline</label><input type="text" id="b-tagline" placeholder="Expert advice since 2005" oninput="saveBrand()"></div>
+  </div>
+  <div style="font-size:10px;color:#7a8499;margin-top:4px">Saved automatically to this device.</div>
 </div>
-<div id="panels">
+
+<div class="panel-bar" id="bar-scen">
+  <div style="font-size:10px;color:#7a8499;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Save / Load Scenarios</div>
+  <div style="display:flex;gap:8px;margin-bottom:12px">
+    <input type="text" id="scen-name" placeholder="Scenario name" style="flex:1;padding:8px 10px;font-size:16px">
+    <button onclick="saveScenario()" style="background:linear-gradient(135deg,#00d4aa,#00b894);border:none;border-radius:6px;color:#0a2418;padding:8px 14px;cursor:pointer;font-size:12px;font-weight:700;font-family:inherit;flex-shrink:0">Save</button>
+  </div>
+  <div id="scen-list"></div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" id="tab-inputs" onclick="showTab('inputs')">Inputs</button>
+  <button class="tab" id="tab-results" onclick="showTab('results')">Results</button>
+  <button class="tab" id="tab-charts" onclick="showTab('charts')">Charts</button>
+  <button class="tab" id="tab-events" onclick="showTab('events')">Events</button>
+</div>
+
+<div class="body">
+
   <div class="panel active" id="panel-inputs">
-    <div class="stitle">Mortgage Details</div>
-    <div class="ig"><label>Mortgage Amount</label><div class="irow"><span class="ipfx">£</span><input type="number" id="mortgageAmount" value="250000" min="10000" step="1000"></div></div>
-    <div class="ig"><label>Interest Rate</label><div class="irow"><span class="ipfx">%</span><input type="number" id="interestRate" value="4.5" min="0.1" max="15" step="0.1"></div></div>
-    <div class="ig"><label>Term (years)</label><div class="irow"><input type="number" id="term" value="25" min="1" max="40" step="1" style="padding-left:12px;"></div></div>
-    <div class="ig"><label>Mortgage Start Date</label><div class="irow"><input type="date" id="mortgageStartDate"></div></div>
-    <div class="stitle">Offset Savings</div>
-    <div class="swrap"><label>Initial Savings to Offset <span>£<span id="savingsDisplay">30,000</span></span></label><input type="range" id="savingsAmount" value="30000" min="0" max="200000" step="1000"></div>
-    <div class="ibox"><strong>💡 How it works:</strong> Your savings reduce the balance interest is charged on — without locking them away. Withdraw any time.</div>
-    <div class="fcabox"><strong>⚠️ YOUR HOME MAY BE REPOSSESSED IF YOU DO NOT KEEP UP REPAYMENTS ON YOUR MORTGAGE.</strong>This calculator is illustrative only and does not constitute financial advice. Always consult a qualified FCA-regulated adviser.</div>
+    <div class="grid">
+      <div class="card">
+        <div class="card-title">Mortgage Details</div>
+        <div class="field"><label>Mortgage Balance</label><div class="iw"><span class="pre">£</span><input type="number" inputmode="decimal" id="v-mortgage" value="200000" onfocus="this.select()"></div></div>
+        <div class="field"><label>Annual Interest Rate</label><div class="iw"><input type="number" inputmode="decimal" id="v-rate" value="4.5" step="0.01" class="suf" onfocus="this.select()"><span class="suf">%</span></div></div>
+        <div class="field"><label>Remaining Term</label><div class="iw"><input type="number" inputmode="numeric" id="v-term" value="25" min="1" max="40" class="suf" onfocus="this.select()"><span class="suf">yrs</span></div></div>
+        <div class="field"><label>Repayment Type</label><select id="v-repay"><option value="repayment">Repayment (Capital and Interest)</option><option value="interestonly">Interest Only</option></select></div>
+        <div class="field"><label>Start Date</label><input type="date" id="v-start" style="font-family:monospace;color-scheme:dark"></div>
+        <div class="field"><label>Monthly Overpayment</label><div class="iw"><span class="pre">£</span><input type="number" inputmode="decimal" id="v-overpay" value="0" onfocus="this.select()"></div><div class="hint">Non-drawable — paid off mortgage capital. Cannot be recovered.</div></div>
+      </div>
+      <div id="pots-area">
+        <button class="btn-add" onclick="addPot()">+ Add Family Member Offset Account</button>
+        <button class="btn" onclick="calculate()">Calculate Savings</button>
+      </div>
+    </div>
   </div>
+
   <div class="panel" id="panel-results">
-    <div class="sbanner"><div class="sb-lbl">Total Interest Saved</div><div class="sb-amt" id="totalSavings">£0</div><div class="sb-sub">By offsetting your savings against your mortgage</div></div>
-    <div class="rgrid">
-      <div class="rcard"><div class="rc-lbl">Standard Monthly</div><div class="rc-val" id="standardPayment">£0</div><div class="rc-sub">Fixed repayment</div></div>
-      <div class="rcard acc"><div class="rc-lbl">Offset Monthly*</div><div class="rc-val" id="offsetPayment">£0</div><div class="rc-sub">*Initial, changes with events</div></div>
-      <div class="rcard"><div class="rc-lbl">Standard Interest</div><div class="rc-val" id="standardInterest">£0</div></div>
-      <div class="rcard acc"><div class="rc-lbl">Offset Interest</div><div class="rc-val" id="offsetInterest">£0</div></div>
-      <div class="rcard"><div class="rc-lbl">Standard Total</div><div class="rc-val" id="standardTotal">£0</div></div>
-      <div class="rcard acc"><div class="rc-lbl">Offset Total</div><div class="rc-val" id="offsetTotal">£0</div></div>
+    <div id="res-ph" class="ph">Enter details and tap <b style="color:#00d4aa">Calculate Savings</b> on the Inputs tab.</div>
+    <div id="res-body" style="display:none">
+      <div class="warn" id="w-io">Interest Only mortgage: capital is not reduced by payments. Full balance remains at term end.</div>
+      <div class="eq-warn" id="w-eq"><div class="eq-warn-t">IMPORTANT - PLEDGED PROPERTY EQUITY INCLUDED</div><div class="eq-warn-b" id="w-eq-b"></div></div>
+      <div class="warn" id="w-exceed"></div>
+      <div class="warn" id="w-empty"></div>
+      <div class="hl"><div class="hl-l">Total Interest Saved with Offset</div><div class="hl-v" id="r-saving">-</div><div class="hl-s" id="r-sub">-</div></div>
+      <div class="stats">
+        <div class="stat"><div class="stat-l">Standard Monthly Payment</div><div class="stat-v green" id="r-pmt">-</div><div class="stat-s">Without offset</div></div>
+        <div class="stat"><div class="stat-l">Month 1 Interest</div><div class="stat-v blue" id="r-m1">-</div><div class="stat-s">With offset</div></div>
+        <div class="stat"><div class="stat-l">Term Reduction</div><div class="stat-v orange" id="r-tr">-</div><div class="stat-s">Months saved</div></div>
+      </div>
+      <div class="dates">
+        <div class="datebox"><div class="datebox-l">Projected End Date</div><div class="datebox-v green" id="r-end">-</div><div class="datebox-s">With offset and overpayments</div></div>
+        <div class="datebox"><div class="datebox-l">Original End Date</div><div class="datebox-v" id="r-std-end" style="color:#7a8499">-</div><div class="datebox-s">Without offset or overpayments</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Linked Offset Accounts</div>
+        <table><thead><tr><th>Account Holder</th><th class="tr">Starting Balance</th><th class="tr">Monthly</th></tr></thead><tbody id="t-pots"></tbody></table>
+      </div>
+      <div class="grid">
+        <div class="card">
+          <div class="card-title">Interest Breakdown Month 1</div>
+          <table><thead><tr><th>Period</th><th class="tr">Without</th><th class="tr">With</th><th class="tr">Saving</th></tr></thead>
+          <tbody>
+            <tr><td>Daily</td><td class="tr" id="r-dd-s">-</td><td class="tr" id="r-dd-o">-</td><td class="tr green" id="r-dd-sv">-</td></tr>
+            <tr><td>Month 1</td><td class="tr" id="r-dm-s">-</td><td class="tr" id="r-dm-o">-</td><td class="tr green" id="r-dm-sv">-</td></tr>
+            <tr><td>Annual yr 1</td><td class="tr" id="r-da-s">-</td><td class="tr" id="r-da-o">-</td><td class="tr green" id="r-da-sv">-</td></tr>
+          </tbody></table>
+        </div>
+        <div class="card">
+          <div class="card-title">Summary</div>
+          <table><tbody id="t-summary"></tbody></table>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Month by Month Schedule</div>
+        <div class="sched-wrap"><table><thead><tr><th>Date</th><th class="tr">Offset Pot</th><th class="tr">Effective</th><th class="tr">Interest</th><th class="tr">Capital</th><th class="tr">Remaining</th></tr></thead><tbody id="t-sched"></tbody></table></div>
+      </div>
     </div>
-    <div class="rgrid" style="grid-template-columns:1fr;"><div class="rcard"><div class="rc-lbl">Effective Balance (now)</div><div class="rc-val" id="effectiveBalance">£0</div><div class="rc-sub">Mortgage minus savings — what interest is charged on</div></div></div>
-    <div class="stitle">Daily & Monthly Interest</div>
-    <div class="igrd">
-      <div class="icard"><div class="ic-head">Standard</div><div class="ic-row"><div class="ic-sub">Daily</div><div class="ic-val" id="standardDailyInterest">£0</div></div><div class="ic-row"><div class="ic-sub">Monthly</div><div class="ic-val" id="standardMonthlyInterest">£0</div></div></div>
-      <div class="icard grn"><div class="ic-head">Offset</div><div class="ic-row"><div class="ic-sub">Daily</div><div class="ic-val" id="offsetDailyInterest">£0</div></div><div class="ic-row"><div class="ic-sub">Monthly</div><div class="ic-val" id="offsetMonthlyInterest">£0</div></div></div>
-    </div>
-    <div class="srow"><div class="sri"><div class="sr-lbl">Daily Saving</div><div class="sr-val" id="dailySavings">£0</div></div><div class="sdiv"></div><div class="sri"><div class="sr-lbl">Monthly Saving</div><div class="sr-val" id="monthlySavings">£0</div></div></div>
-    <div class="cblock"><h3>Total Interest Comparison</h3><div class="bwrap"><div class="bitem"><div class="bamt" id="standardBarAmt">£0</div><div class="bfill std" id="standardBar" style="height:100%;"></div><div class="blbl">Standard</div></div><div class="bitem"><div class="bamt" id="offsetBarAmt">£0</div><div class="bfill off" id="offsetBar" style="height:50%;"></div><div class="blbl">Offset</div></div></div></div>
   </div>
+
   <div class="panel" id="panel-charts">
-    <div class="cblock"><h3>Outstanding Balance Over Term</h3><p>How your mortgage balance reduces over time</p><canvas id="termChart"></canvas><div class="cleg"><span><span class="ll" style="background:#667eea;"></span>Standard</span><span><span class="ll" style="background:#10b981;"></span>Offset</span><span><span class="ll" style="background:#f59e0b;"></span>Savings</span></div></div>
-    <div class="cblock"><h3>Cumulative Interest Paid</h3><p>The gap between lines is your total interest saving</p><canvas id="interestChart"></canvas><div class="cleg"><span><span class="ll" style="background:#667eea;"></span>Standard</span><span><span class="ll" style="background:#10b981;"></span>Offset</span></div></div>
+    <div id="ch-ph" class="ph">Calculate first to see charts.</div>
+    <div id="ch-body" style="display:none">
+      <div class="ch-box"><div class="ch-t">Cumulative Interest - With vs Without Offset</div><canvas id="c1" height="170"></canvas></div>
+      <div class="ch-box"><div class="ch-t">Individual Offset Pot Growth</div><canvas id="c2" height="170"></canvas></div>
+      <div class="grid">
+        <div class="ch-box"><div class="ch-t">Total Offset Pot</div><canvas id="c3" height="170"></canvas></div>
+        <div class="ch-box"><div class="ch-t">Remaining Balance</div><canvas id="c4" height="170"></canvas></div>
+      </div>
+    </div>
   </div>
+
   <div class="panel" id="panel-events">
-    <div class="stitle">Life Events</div>
-    <p style="font-size:0.75rem;color:var(--muted);margin-bottom:12px;">Add one-off or monthly deposits/withdrawals — e.g. inheritance, renovation, salary saving.</p>
-    <div id="eventsContainer"></div>
-    <button class="btnadd" id="addEventBtn">+ Add Life Event</button>
-    <div id="eventsTimeline" style="display:none;"><div class="stitle">Timeline</div><div id="eventsTimelineList"></div></div>
+    <div class="card">
+      <div class="card-title">Life Events</div>
+      <p style="font-size:12px;color:#7a8499;margin-bottom:14px;line-height:1.6">Add events that change your offset savings or overpayments. Change events can have a stop date.</p>
+      <div class="draw-info">
+        Drawable: Lump Sum IN/OUT and Monthly Savings changes affect offset accounts - money stays accessible.<br>
+        Non-drawable: Monthly Overpayment changes go directly off mortgage capital - cannot be recovered.<br>
+        Rate Change: Applied from the date specified onwards.
+      </div>
+      <div id="ev-list"><p style="color:#7a8499;font-size:12px">No life events added yet.</p></div>
+      <button class="btn-add" style="margin-top:8px;margin-bottom:0" onclick="addEvent()">+ Add Life Event</button>
+    </div>
+    <button class="btn" onclick="calculate()">Recalculate with Events</button>
+  </div>
+
+</div>
+</div>
+
+<div id="email-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:50;padding:calc(20px + env(safe-area-inset-top,0px)) 16px calc(20px + env(safe-area-inset-bottom,0px));overflow-y:auto">
+  <div style="max-width:560px;margin:0 auto;background:#13161f;border:1px solid #252a38;border-radius:10px;padding:16px">
+    <div style="font-weight:700;margin-bottom:6px">Email summary</div>
+    <div style="font-size:12px;color:#7a8499;margin-bottom:10px">Copy this text, then paste it into an email to your client.</div>
+    <textarea id="email-text" readonly style="width:100%;height:280px;background:#0b0d12;border:1px solid #252a38;border-radius:6px;color:#e2e8f0;padding:10px;font-family:monospace;font-size:13px"></textarea>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="btn" style="margin-top:0" onclick="copyEmail()" id="copy-btn">Copy text</button>
+      <button class="btn" style="margin-top:0;background:#252a38;color:#e2e8f0" onclick="closeEmail()">Close</button>
+    </div>
+    <div id="copy-msg" style="font-size:12px;color:#7a8499;margin-top:8px"></div>
   </div>
 </div>
+<div id="toast" style="display:none;position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:#1a1e2a;border:1px solid #252a38;border-radius:8px;padding:10px 16px;font-size:12px;z-index:60"></div>
+
+<div id="print-life-events" style="display:none;padding:14px">
+  <div class="card">
+    <div class="card-title">Life Events Applied to This Illustration</div>
+    <table>
+      <thead><tr><th>Date</th><th>Event Type</th><th>Detail</th><th>Stop Date</th></tr></thead>
+      <tbody id="print-ev-table"><tr><td colspan="4" style="color:#7a8499">No life events.</td></tr></tbody>
+    </table>
+  </div>
 </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <script>
-const $=id=>document.getElementById(id),fmt=n=>'£'+Math.round(n).toLocaleString('en-GB');
-const mAmt=$('mortgageAmount'),mRate=$('interestRate'),mTerm=$('term'),mSav=$('savingsAmount'),mDate=$('mortgageStartDate');
-let termChart=null,intChart=null,events=[],eid=0;
-mDate.valueAsDate=new Date();
-document.querySelectorAll('.tab').forEach(t=>{t.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));t.classList.add('active');$('panel-'+t.dataset.p).classList.add('active');if(t.dataset.p==='charts')buildCharts();});});
-function mp(P,r,y){const mr=r/100/12,n=y*12;if(!mr)return P/n;return P*(mr*Math.pow(1+mr,n))/(Math.pow(1+mr,n)-1);}
-function savAt(m,init){let s=init;const st=new Date(mDate.value);for(const ev of events){const em=Math.floor((new Date(ev.date)-st)/(1000*60*60*24*30.44));if(ev.freq==='once'){if(em<=m)s+=ev.type==='deposit'?ev.amt:-ev.amt;}else{if(em<=m)s+=(ev.type==='deposit'?1:-1)*ev.amt*(m-em+1);}}return Math.max(0,s);}
-function amort(P,r,y,payment){const mr=r/100/12,n=y*12;let bal=P,tot=0;const bals=[],ints=[],months=[];for(let m=0;m<=n;m++){bals.push(bal);ints.push(tot);months.push(m);if(m<n&&bal>0){const ip=bal*mr;bal=Math.max(0,bal-(payment-ip));tot+=ip;}}return{bals,ints,months};}
-function amortOff(P,r,y,init){const mr=r/100/12,n=y*12,pay=mp(P,r,y);let bal=P,tot=0;const bals=[],ints=[],savs=[],months=[];for(let m=0;m<=n;m++){bals.push(bal);ints.push(tot);savs.push(savAt(m,init));months.push(m);if(m<n&&bal>0){const eff=Math.max(0,bal-savAt(m,init)),ip=eff*mr;bal=Math.max(0,bal-(pay-ip));tot+=ip;}}return{bals,ints,savs,months};}
-function calc(){const P=parseFloat(mAmt.value)||0,r=parseFloat(mRate.value)||0,y=parseFloat(mTerm.value)||0,init=parseFloat(mSav.value)||0;
-$('savingsDisplay').textContent=init.toLocaleString('en-GB');
-const stdMp=mp(P,r,y),stdInt=stdMp*y*12-P,stdTot=P+stdInt,off=amortOff(P,r,y,init),offInt=off.ints[off.ints.length-1],offTot=P+offInt,effBal=Math.max(0,P-init),offMp=mp(effBal,r,y),saved=stdInt-offInt;
-$('topSavings').textContent='Saved: '+fmt(saved);$('totalSavings').textContent=fmt(saved);$('standardPayment').textContent=fmt(stdMp);$('offsetPayment').textContent=fmt(offMp)+'*';$('standardInterest').textContent=fmt(stdInt);$('offsetInterest').textContent=fmt(offInt);$('standardTotal').textContent=fmt(stdTot);$('offsetTotal').textContent=fmt(offTot);$('effectiveBalance').textContent=fmt(effBal);
-const dr=r/100/365,mr2=r/100/12;$('standardDailyInterest').textContent=fmt(P*dr);$('standardMonthlyInterest').textContent=fmt(P*mr2);$('offsetDailyInterest').textContent=fmt(effBal*dr);$('offsetMonthlyInterest').textContent=fmt(effBal*mr2);$('dailySavings').textContent=fmt((P-effBal)*dr);$('monthlySavings').textContent=fmt((P-effBal)*mr2);
-const mx=Math.max(stdInt,offInt,1);$('standardBar').style.height=(stdInt/mx*100)+'%';$('offsetBar').style.height=(offInt/mx*100)+'%';$('standardBarAmt').textContent=fmt(stdInt);$('offsetBarAmt').textContent=fmt(offInt);
-buildTimeline();if($('panel-charts').classList.contains('active'))buildCharts();}
-function buildCharts(){const P=parseFloat(mAmt.value)||0,r=parseFloat(mRate.value)||0,y=parseFloat(mTerm.value)||0,init=parseFloat(mSav.value)||0;
-const stdD=amort(P,r,y,mp(P,r,y)),offD=amortOff(P,r,y,init),lbs=stdD.months.map(m=>(m/12).toFixed(1)),st=new Date(mDate.value);
-const ann=events.map(ev=>{const ms=(new Date(ev.date)-st)/(1000*60*60*24*30.44);return{type:'line',xMin:ms/12,xMax:ms/12,borderColor:ev.type==='deposit'?'#10b981':'#ef4444',borderWidth:1,borderDash:[4,4],label:{display:true,content:(ev.type==='deposit'?'+':'-')+'£'+ev.amt.toLocaleString()+(ev.freq==='monthly'?'/mo':''),position:'start',backgroundColor:ev.type==='deposit'?'#10b981':'#ef4444',color:'#fff',font:{size:9},padding:3,borderRadius:3}};});
-const base={responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false},annotation:{annotations:ann},tooltip:{callbacks:{label:c=>c.dataset.label+': '+fmt(c.parsed.y)}}},scales:{x:{ticks:{color:'#8898aa',font:{size:9},callback(v){const yr=parseFloat(this.getLabelForValue(v));return yr%1===0?yr:'';}},grid:{color:'rgba(255,255,255,0.04)'},title:{display:true,text:'Years',color:'#8898aa',font:{size:9}}},y:{ticks:{color:'#8898aa',font:{size:9},callback:v=>'£'+(v/1000).toFixed(0)+'k'},grid:{color:'rgba(255,255,255,0.04)'},beginAtZero:true}}};
-if(termChart)termChart.destroy();termChart=new Chart($('termChart').getContext('2d'),{type:'line',data:{labels:lbs,datasets:[{label:'Standard',data:stdD.bals,borderColor:'#667eea',borderWidth:2,pointRadius:0,fill:false,tension:0.1},{label:'Offset',data:offD.bals,borderColor:'#10b981',borderWidth:2,pointRadius:0,fill:false,tension:0.1},{label:'Savings',data:offD.savs,borderColor:'#f59e0b',borderWidth:2,pointRadius:0,fill:false,tension:0.1,borderDash:[5,5]}]},options:{...base,interaction:{mode:'index',intersect:false}}});
-if(intChart)intChart.destroy();intChart=new Chart($('interestChart').getContext('2d'),{type:'line',data:{labels:lbs,datasets:[{label:'Standard',data:stdD.ints,borderColor:'#667eea',backgroundColor:'rgba(102,126,234,0.1)',borderWidth:2,pointRadius:0,fill:true,tension:0.1},{label:'Offset',data:offD.ints,borderColor:'#10b981',backgroundColor:'rgba(16,185,129,0.1)',borderWidth:2,pointRadius:0,fill:true,tension:0.1}]},options:base});}
-$('addEventBtn').addEventListener('click',()=>{const id=eid++;const def=new Date(mDate.value);def.setFullYear(def.getFullYear()+1);const ds=def.toISOString().split('T')[0];const card=document.createElement('div');card.className='evcard deposit';card.dataset.eid=id;card.innerHTML=`<div class="evrow"><div class="evf"><label>Type</label><select class="ev-type" data-id="${id}"><option value="deposit">Deposit</option><option value="withdrawal">Withdrawal</option></select></div><div class="evf"><label>Frequency</label><select class="ev-freq" data-id="${id}"><option value="once">One-time</option><option value="monthly">Monthly</option></select></div></div><div class="evrow"><div class="evf"><label>Date</label><input type="date" class="ev-date" value="${ds}" data-id="${id}"></div><div class="evf"><label>Amount (£)</label><input type="number" class="ev-amt" value="1000" min="0" step="100" data-id="${id}"></div></div><div class="evrow" style="grid-template-columns:1fr auto;"><div></div><button class="evdel ev-del" data-id="${id}">Remove</button></div>`;
-$('eventsContainer').appendChild(card);events.push({id,type:'deposit',date:ds,freq:'once',amt:1000});
-card.querySelector('.ev-type').addEventListener('change',e=>{const ev=events.find(x=>x.id===parseInt(e.target.dataset.id));ev.type=e.target.value;card.className='evcard '+e.target.value;calc();});
-card.querySelector('.ev-date').addEventListener('input',e=>{events.find(x=>x.id===parseInt(e.target.dataset.id)).date=e.target.value;calc();});
-card.querySelector('.ev-freq').addEventListener('change',e=>{events.find(x=>x.id===parseInt(e.target.dataset.id)).freq=e.target.value;calc();});
-card.querySelector('.ev-amt').addEventListener('input',e=>{events.find(x=>x.id===parseInt(e.target.dataset.id)).amt=parseFloat(e.target.value)||0;calc();});
-card.querySelector('.ev-del').addEventListener('click',e=>{events=events.filter(x=>x.id!==parseInt(e.target.dataset.id));card.remove();calc();});calc();});
-function buildTimeline(){const wrap=$('eventsTimeline'),list=$('eventsTimelineList');if(!events.length){wrap.style.display='none';return;}wrap.style.display='block';const sorted=[...events].sort((a,b)=>new Date(a.date)-new Date(b.date));list.innerHTML=sorted.map(ev=>{const d=new Date(ev.date).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});return`<div class="tlitem"><div class="tldot ${ev.type}"></div><div class="tlinf"><div class="tldate">${d} · ${ev.freq==='monthly'?'Monthly':'One-time'}</div><div class="tldesc">${ev.type==='deposit'?'Deposit':'Withdrawal'}</div></div><div class="tlamt ${ev.type==='deposit'?'pos':'neg'}">${ev.type==='deposit'?'+':'-'}£${ev.amt.toLocaleString()}${ev.freq==='monthly'?'/mo':''}</div></div>`;}).join('');}
-[mAmt,mRate,mTerm,mSav,mDate].forEach(el=>el.addEventListener('input',calc));calc();
+var POT_COLORS = ['#00d4aa','#4f8ef7','#f5a623','#e8445a','#a78bfa','#34d399'];
+var pots = [{id:1, name:'Borrower', balance:20000, monthly:200, potType:'cash'}];
+var evts = [];
+var eid = 0;
+var pid = 1;
+var calcRes = null;
+
+function f(v){ return '£' + Math.round(v).toLocaleString('en-GB'); }
+function f2(v){ return '£' + Number(v).toFixed(2); }
+
+window.onload = function() {
+  document.getElementById('v-start').value = new Date().toISOString().split('T')[0];
+  loadBrand();
+  renderScenarios();
+  renderPots();
+  renderEvents();
+};
+
+function showTab(name) {
+  var tabs = ['inputs','results','charts','events'];
+  for (var i = 0; i < tabs.length; i++) {
+    var p = document.getElementById('panel-' + tabs[i]);
+    var t = document.getElementById('tab-' + tabs[i]);
+    if (p) p.className = 'panel' + (tabs[i] === name ? ' active' : '');
+    if (t) t.className = 'tab' + (tabs[i] === name ? ' active' : '');
+  }
+}
+
+function toggleBar(id) {
+  var bars = ['bar-brand','bar-scen'];
+  for (var i = 0; i < bars.length; i++) {
+    var el = document.getElementById(bars[i]);
+    if (!el) continue;
+    if (bars[i] === id) {
+      el.className = el.className === 'panel-bar open' ? 'panel-bar' : 'panel-bar open';
+    } else {
+      el.className = 'panel-bar';
+    }
+  }
+}
+
+function saveBrand() {
+  var b = {
+    adviser: document.getElementById('b-adviser').value,
+    company: document.getElementById('b-company').value,
+    contact: document.getElementById('b-contact').value,
+    tagline: document.getElementById('b-tagline').value
+  };
+  try { localStorage.setItem('omc_brand', JSON.stringify(b)); } catch(e) {}
+}
+function loadBrand() {
+  try {
+    var b = JSON.parse(localStorage.getItem('omc_brand') || '{}');
+    if (b.adviser) document.getElementById('b-adviser').value = b.adviser;
+    if (b.company) document.getElementById('b-company').value = b.company;
+    if (b.contact) document.getElementById('b-contact').value = b.contact;
+    if (b.tagline) document.getElementById('b-tagline').value = b.tagline;
+  } catch(e) {}
+}
+function getBrand() {
+  return {
+    adviser: document.getElementById('b-adviser').value,
+    company: document.getElementById('b-company').value,
+    contact: document.getElementById('b-contact').value,
+    tagline: document.getElementById('b-tagline').value
+  };
+}
+
+function saveScenario() {
+  var name = document.getElementById('scen-name').value.trim();
+  if (!name) return;
+  var all = getScenarios();
+  all[name] = {
+    mortgage: document.getElementById('v-mortgage').value,
+    rate: document.getElementById('v-rate').value,
+    term: document.getElementById('v-term').value,
+    repay: document.getElementById('v-repay').value,
+    start: document.getElementById('v-start').value,
+    overpay: document.getElementById('v-overpay').value,
+    pots: JSON.parse(JSON.stringify(pots)),
+    evts: JSON.parse(JSON.stringify(evts)),
+    saved: new Date().toLocaleDateString('en-GB')
+  };
+  try { localStorage.setItem('omc_scenarios', JSON.stringify(all)); } catch(e) {}
+  document.getElementById('scen-name').value = '';
+  renderScenarios();
+}
+function getScenarios() {
+  try { return JSON.parse(localStorage.getItem('omc_scenarios') || '{}'); } catch(e) { return {}; }
+}
+function loadScenario(name) {
+  var s = getScenarios()[name];
+  if (!s) return;
+  document.getElementById('v-mortgage').value = s.mortgage || 200000;
+  document.getElementById('v-rate').value = s.rate || 4.5;
+  document.getElementById('v-term').value = s.term || 25;
+  document.getElementById('v-repay').value = s.repay || 'repayment';
+  document.getElementById('v-start').value = s.start || '';
+  document.getElementById('v-overpay').value = s.overpay || 0;
+  pots = s.pots || [{id:1,name:'Borrower',balance:20000,monthly:200,potType:'cash'}];
+  evts = s.evts || [];
+  renderPots(); renderEvents();
+  toggleBar('bar-scen');
+  showTab('inputs');
+}
+function deleteScenario(name) {
+  var all = getScenarios();
+  delete all[name];
+  try { localStorage.setItem('omc_scenarios', JSON.stringify(all)); } catch(e) {}
+  renderScenarios();
+}
+function renderScenarios() {
+  var all = getScenarios();
+  var keys = Object.keys(all);
+  var el = document.getElementById('scen-list');
+  if (!keys.length) { el.innerHTML = '<div style="font-size:12px;color:#7a8499">No saved scenarios yet.</div>'; return; }
+  var html = '';
+  for (var i = 0; i < keys.length; i++) {
+    var k = keys[i];
+    var ks = k.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    html += '<div class="scen-row">' +
+      '<div style="flex:1"><div style="font-size:12px;font-weight:600;color:#e2e8f0">' + k + '</div>' +
+      '<div style="font-size:10px;color:#7a8499">Saved ' + all[k].saved + '</div></div>' +
+      '<button onclick="loadScenario(\'' + ks + '\')" style="background:rgba(79,142,247,.12);border:1px solid rgba(79,142,247,.3);border-radius:5px;color:#4f8ef7;padding:5px 10px;cursor:pointer;font-size:11px;font-family:inherit">Load</button>' +
+      '<button onclick="deleteScenario(\'' + ks + '\')" style="background:rgba(232,68,90,.1);border:1px solid rgba(232,68,90,.3);border-radius:5px;color:#e8445a;padding:5px 10px;cursor:pointer;font-size:11px;font-family:inherit">Delete</button>' +
+    '</div>';
+  }
+  el.innerHTML = html;
+}
+
+function addPot() {
+  pid++;
+  pots.push({id:pid, name:'Family Member', balance:0, monthly:0, potType:'cash'});
+  renderPots();
+}
+function removePot(id) {
+  if (pots.length <= 1) return;
+  pots = pots.filter(function(p){ return p.id !== id; });
+  renderPots();
+}
+function setPotField(id, field, val) {
+  var p = pots.find(function(x){ return x.id === id; });
+  if (p) { p[field] = val; }
+  if (field === 'potType') renderPots();
+}
+function renderPots() {
+  var area = document.getElementById('pots-area');
+  var addBtn = area.querySelector('.btn-add');
+  var old = area.querySelectorAll('.pot-card');
+  for (var i = 0; i < old.length; i++) { old[i].parentNode.removeChild(old[i]); }
+  for (var i = 0; i < pots.length; i++) {
+    var pot = pots[i];
+    var isEq = pot.potType === 'equity';
+    var col = isEq ? '#e8445a' : POT_COLORS[i % POT_COLORS.length];
+    var card = document.createElement('div');
+    card.className = 'pot-card' + (isEq ? ' equity' : '');
+    card.style.borderLeft = '4px solid ' + col;
+    var html = '<div class="pot-hdr">' +
+      '<div class="pot-title" style="color:' + col + '">' + (isEq ? 'Pledged Equity ' + (i+1) : 'Offset Account ' + (i+1)) + '</div>' +
+      (pots.length > 1 ? '<button class="pot-rm" onclick="removePot(' + pot.id + ')">Remove</button>' : '') +
+    '</div>' +
+    '<div class="field"><label>Account Holder</label><input type="text" value="' + pot.name.replace(/"/g,'&quot;') + '" oninput="setPotField(' + pot.id + ', \'name\', this.value)"></div>' +
+    '<div class="field"><label>Pot Type</label><select onchange="setPotField(' + pot.id + ', \'potType\', this.value)">' +
+      '<option value="cash"' + (isEq ? '' : ' selected') + '>Cash Savings (drawable)</option>' +
+      '<option value="equity"' + (isEq ? ' selected' : '') + '>Pledged Property Equity</option>' +
+    '</select></div>';
+    if (isEq) {
+      html += '<div class="eq-box">PLEDGED PROPERTY EQUITY: Legal charge on a third party property. Monthly set to 0. Withdrawals need lender consent. Independent legal advice required for all parties.</div>';
+    }
+    html += '<div class="field"><label>' + (isEq ? 'Equity Amount' : 'Starting Balance') + '</label>' +
+      '<div class="iw"><span class="pre">£</span><input type="number" inputmode="decimal" value="' + pot.balance + '" onfocus="this.select()" oninput="setPotField(' + pot.id + ', \'balance\', this.value)"></div>' +
+      '<div class="hint">' + (isEq ? 'Fixed - cannot be withdrawn like cash' : 'Drawable - accessible savings') + '</div></div>' +
+    '<div class="field"><label>Monthly Contribution</label>' +
+      '<div class="iw"><span class="pre">£</span><input type="number" inputmode="decimal" value="' + (isEq ? 0 : pot.monthly) + '" ' + (isEq ? 'disabled' : '') + ' onfocus="this.select()" oninput="setPotField(' + pot.id + ', \'monthly\', this.value)"></div>' +
+      '<div class="hint">' + (isEq ? 'Locked at 0' : 'Drawable - added monthly') + '</div></div>';
+    card.innerHTML = html;
+    area.insertBefore(card, addBtn);
+  }
+}
+
+function addEvent() {
+  eid++;
+  evts.push({id:eid, date:'', type:'lump_in', amt:'', stopdate:'', potId:null});
+  renderEvents();
+}
+function removeEvent(id) {
+  evts = evts.filter(function(e){ return e.id !== id; });
+  renderEvents();
+  if (calcRes) calculate();
+}
+function setEvtField(id, field, val) {
+  var e = evts.find(function(x){ return x.id === id; });
+  if (e) e[field] = (field === 'potId') ? +val : val;
+  if (field === 'type') renderEvents();
+}
+function evtTitle(t) {
+  if (t === 'lump_in') return 'Lump Sum IN';
+  if (t === 'lump_out') return 'Lump Sum OUT';
+  if (t === 'change_saving') return 'Change Monthly Savings';
+  if (t === 'change_overpayment') return 'Change Monthly Overpayment';
+  return 'Rate Change';
+}
+function renderEvents() {
+  var el = document.getElementById('ev-list');
+  if (!evts.length) { el.innerHTML = '<p style="color:#7a8499;font-size:12px">No life events added yet.</p>'; return; }
+  var html = '';
+  for (var i = 0; i < evts.length; i++) {
+    var ev = evts[i];
+    var isRate = ev.type === 'rate_change';
+    var hasStop = ev.type === 'change_saving' || ev.type === 'change_overpayment';
+    var showPot = (ev.type === 'lump_in' || ev.type === 'lump_out' || ev.type === 'change_saving') && pots.length > 1;
+    var potOpts = '';
+    if (showPot) {
+      for (var j = 0; j < pots.length; j++) {
+        potOpts += '<option value="' + pots[j].id + '"' + (ev.potId === pots[j].id ? ' selected' : '') + '>' + (pots[j].name || 'Account '+(j+1)) + '</option>';
+      }
+    }
+    html += '<div class="ev-card">' +
+      '<div class="ev-hdr"><div class="ev-title">' + evtTitle(ev.type) + '</div><button class="ev-rm" onclick="removeEvent(' + ev.id + ')">Remove</button></div>' +
+      '<div class="grid" style="margin-bottom:10px">' +
+        '<div class="field" style="margin-bottom:0"><label>Start Date</label><input type="date" value="' + (ev.date||'') + '" style="font-family:monospace;color-scheme:dark" onchange="setEvtField(' + ev.id + ',\'date\',this.value)"></div>' +
+        '<div class="field" style="margin-bottom:0"><label>Event Type</label><select onchange="setEvtField(' + ev.id + ',\'type\',this.value)">' +
+          '<option value="lump_in"' + (ev.type==='lump_in'?' selected':'') + '>Lump Sum IN</option>' +
+          '<option value="lump_out"' + (ev.type==='lump_out'?' selected':'') + '>Lump Sum OUT</option>' +
+          '<option value="change_saving"' + (ev.type==='change_saving'?' selected':'') + '>Change Monthly Savings</option>' +
+          '<option value="change_overpayment"' + (ev.type==='change_overpayment'?' selected':'') + '>Change Monthly Overpayment</option>' +
+          '<option value="rate_change"' + (ev.type==='rate_change'?' selected':'') + '>Rate Change</option>' +
+        '</select></div>' +
+      '</div>' +
+      (showPot ? '<div class="field"><label>Apply to Account</label><select onchange="setEvtField(' + ev.id + ',\'potId\',+this.value)">' + potOpts + '</select></div>' : '') +
+      (isRate ?
+        '<div class="field"><label>New Annual Rate (%)</label><div class="iw"><input type="number" inputmode="decimal" value="' + (ev.amt||'') + '" placeholder="e.g. 6.25" min="0.01" max="30" step="0.01" style="padding-right:28px" onfocus="this.select()" oninput="setEvtField(' + ev.id + ',\'amt\',this.value)"><span class="suf">%</span></div><div class="hint">Applied from this date onwards</div></div>' :
+        '<div class="field"><label>Amount</label><div class="iw"><span class="pre">£</span><input type="number" inputmode="decimal" value="' + (ev.amt||'') + '" placeholder="Enter amount" min="0" onfocus="this.select()" oninput="setEvtField(' + ev.id + ',\'amt\',this.value)" style="font-size:16px"></div></div>'
+      ) +
+      (hasStop ? '<div class="field"><label>Stop Date (leave blank for permanent)</label><input type="date" value="' + (ev.stopdate||'') + '" style="font-family:monospace;color-scheme:dark" onchange="setEvtField(' + ev.id + ',\'stopdate\',this.value)"></div>' : '') +
+    '</div>';
+  }
+  el.innerHTML = html;
+}
+
+function drawChart(canvasId, datasets, showLegend, endIdx, endLabel) {
+  var c = document.getElementById(canvasId);
+  if (!c) return;
+  var dpr = window.devicePixelRatio || 1;
+  var W = c.offsetWidth || 300, H = 170;
+  c.width = W * dpr; c.height = H * dpr;
+  c.style.width = W + 'px'; c.style.height = H + 'px';
+  var ctx = c.getContext('2d');
+  ctx.scale(dpr, dpr);
+  var pad = {t:22, r:10, b:26, l:52};
+  var pw = W - pad.l - pad.r, ph = H - pad.t - pad.b;
+  var all = [];
+  for (var i = 0; i < datasets.length; i++) { all = all.concat(datasets[i].data); }
+  var mn = Math.min.apply(null, all), mx = Math.max.apply(null, all), rng = mx - mn || 1;
+  function tx(i, n) { return n < 2 ? pad.l : pad.l + (i / (n-1)) * pw; }
+  function ty(v) { return pad.t + ph - ((v - mn) / rng) * ph; }
+  for (var g = 0; g <= 4; g++) {
+    var gy = pad.t + (ph / 4) * g;
+    ctx.strokeStyle = 'rgba(37,42,56,0.8)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(pad.l, gy); ctx.lineTo(pad.l + pw, gy); ctx.stroke();
+    ctx.fillStyle = '#7a8499'; ctx.font = '10px monospace'; ctx.textAlign = 'right';
+    ctx.fillText('£' + Math.round((mx - (rng/4)*g)/1000) + 'k', pad.l - 4, gy + 3);
+  }
+  var n = datasets[0].data.length, step = Math.ceil(n / 5);
+  ctx.fillStyle = '#7a8499'; ctx.font = '10px monospace'; ctx.textAlign = 'center';
+  for (var xi = 0; xi < n; xi += step) { ctx.fillText(datasets[0].labels[xi] || '', tx(xi, n), H - 4); }
+  for (var di = 0; di < datasets.length; di++) {
+    var ds = datasets[di];
+    if (!ds.data.length) continue;
+    ctx.beginPath();
+    for (var pi = 0; pi < ds.data.length; pi++) {
+      var x = tx(pi, n), y = ty(ds.data[pi]);
+      if (pi === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.strokeStyle = ds.color; ctx.lineWidth = 2; ctx.stroke();
+    var gr = ctx.createLinearGradient(0, pad.t, 0, pad.t + ph);
+    gr.addColorStop(0, ds.color + '33'); gr.addColorStop(1, ds.color + '05');
+    ctx.lineTo(tx(n-1, n), pad.t + ph); ctx.lineTo(tx(0, n), pad.t + ph);
+    ctx.closePath(); ctx.fillStyle = gr; ctx.fill();
+  }
+  if (endIdx !== undefined && endIdx >= 0 && n > 1) {
+    var li = Math.min(endIdx, n - 1);
+    while (li > 0 && datasets[0].data[li] < 1) li--;
+    var ex = tx(li, n);
+    ctx.save(); ctx.strokeStyle = '#00d4aa'; ctx.lineWidth = 1.5; ctx.setLineDash([4,3]);
+    ctx.beginPath(); ctx.moveTo(ex, pad.t); ctx.lineTo(ex, pad.t + ph); ctx.stroke();
+    ctx.setLineDash([]); ctx.fillStyle = '#00d4aa'; ctx.font = 'bold 10px monospace';
+    var lbl = endLabel || 'Paid off';
+    var lw = ctx.measureText(lbl).width;
+    ctx.textAlign = (ex + lw + 8 > W - pad.r) ? 'right' : 'left';
+    ctx.fillText(lbl, (ex + lw + 8 > W - pad.r) ? ex - 4 : ex + 4, pad.t + 12);
+    ctx.restore();
+  }
+  if (showLegend) {
+    var lx = pad.l;
+    for (var li2 = 0; li2 < datasets.length; li2++) {
+      ctx.fillStyle = datasets[li2].color; ctx.fillRect(lx, 5, 14, 3);
+      ctx.fillStyle = '#7a8499'; ctx.font = '10px monospace'; ctx.textAlign = 'left';
+      ctx.fillText(datasets[li2].label, lx + 18, 11);
+      lx += ctx.measureText(datasets[li2].label).width + 36;
+    }
+  }
+}
+
+function calculate() {
+  var mg = +document.getElementById('v-mortgage').value || 0;
+  var rate = +document.getElementById('v-rate').value / 100 || 0;
+  var ty = +document.getElementById('v-term').value || 25;
+  var op = +document.getElementById('v-overpay').value || 0;
+  var rt = document.getElementById('v-repay').value;
+  var sds = document.getElementById('v-start').value;
+  var sd = sds ? new Date(sds) : new Date();
+  var tm = ty * 12, mr = rate / 12, dr = rate / 365;
+  var pmt = rt === 'interestonly' ? mg * mr : mg * (mr * Math.pow(1+mr,tm)) / (Math.pow(1+mr,tm) - 1) || 0;
+  var totalS0 = pots.reduce(function(a,p){ return a + (+p.balance||0); }, 0);
+
+  var sb = mg, sti = 0, stdCs = [], csi = 0, stdMonths = 0, stdM1Int = 0, stdM1Days = 0;
+  for (var m = 0; m < tm; m++) {
+    var cd = new Date(sd); cd.setMonth(cd.getMonth() + m);
+    var dim = new Date(cd.getFullYear(), cd.getMonth()+1, 0).getDate();
+    var ii = sb * dr * dim;
+    if (m === 0) { stdM1Int = ii; stdM1Days = dim; }
+    sti += ii; csi += ii; stdCs.push(csi);
+    var c0 = rt === 'interestonly' ? 0 : Math.min(sb, pmt - ii);
+    sb = Math.max(0, sb - c0); stdMonths = m + 1;
+    if (sb < 0.01) break;
+  }
+
+  var bal = mg, toi = 0, ma = 0, cumI = 0;
+  var potBals = pots.map(function(p){ return +p.balance||0; });
+  var potMos = pots.map(function(p){ return p.potType==='equity' ? 0 : (+p.monthly||0); });
+  var rows=[], co=[], os=[], bs=[], lb=[];
+  var potSeries = pots.map(function(){ return []; });
+  var potExc=false, potExcDate='', potEmp=false, potEmpDate='', offM1Int=0;
+  var hasEq = pots.some(function(p){ return p.potType==='equity'; });
+
+  for (var m = 0; m < tm * 2; m++) {
+    if (bal <= 0.01) break;
+    var cd = new Date(sd); cd.setMonth(cd.getMonth() + m);
+    var ds = cd.toLocaleDateString('en-GB', {month:'short', year:'2-digit'});
+    var el = '', curOp = op, curDr = dr;
+    var nmAdj = pots.map(function(){ return 0; });
+
+    for (var ei = 0; ei < evts.length; ei++) {
+      var ev = evts[ei];
+      if (!ev.date) continue;
+      var ed = new Date(ev.date);
+      var isAct = ed.getFullYear()===cd.getFullYear() && ed.getMonth()===cd.getMonth();
+      if (ev.type === 'change_saving' || ev.type === 'change_overpayment') {
+        var started = ed <= cd;
+        var stopped = ev.stopdate && new Date(ev.stopdate) <= cd;
+        if (started && !stopped) {
+          if (ev.type === 'change_saving' && +ev.amt >= 0) {
+            var pi = ev.potId ? pots.findIndex(function(p){ return p.id===ev.potId; }) : 0;
+            if (pi >= 0) nmAdj[pi] = +ev.amt - potMos[pi];
+            if (isAct) el = 'Savings to ' + f(+ev.amt);
+          }
+          if (ev.type === 'change_overpayment' && +ev.amt >= 0) { curOp = +ev.amt; if (isAct) el = 'Overpay to ' + f(+ev.amt); }
+        }
+        if (isAct && stopped) el = (ev.type==='change_saving'?'Savings':'Overpay') + ' reverted';
+        continue;
+      }
+      if (ev.type === 'rate_change') {
+        if (ed <= cd && +ev.amt > 0) { curDr = +ev.amt/100/365; if (isAct) el = 'Rate ' + (+ev.amt).toFixed(2) + '%'; }
+        continue;
+      }
+      if (!+ev.amt || +ev.amt <= 0) continue;
+      if (isAct) {
+        var pi2 = ev.potId ? pots.findIndex(function(p){ return p.id==ev.potId; }) : 0;
+        var idx = pi2 >= 0 ? pi2 : 0;
+        if (ev.type === 'lump_in') { potBals[idx] += +ev.amt; el = '+' + f(+ev.amt) + ' IN (' + (pots[idx]?pots[idx].name:'Pot') + ')'; }
+        else if (ev.type === 'lump_out') {
+          if (pots[idx] && pots[idx].potType === 'equity') { el = 'Cannot withdraw from equity pot'; }
+          else { potBals[idx] = Math.max(0, potBals[idx] - +ev.amt); el = '-' + f(+ev.amt) + ' OUT (' + (pots[idx]?pots[idx].name:'Pot') + ')'; }
+        }
+      }
+    }
+
+    var tp = potBals.reduce(function(a,b){ return a+b; }, 0);
+    if (!potExc && tp >= bal && bal > 0.01) { potExc = true; potExcDate = cd.toLocaleDateString('en-GB',{month:'long',year:'numeric'}); }
+    var eff = Math.max(0, bal - tp);
+    var dim2 = new Date(cd.getFullYear(), cd.getMonth()+1, 0).getDate();
+    var interest = eff * curDr * dim2;
+    if (m === 0) offM1Int = interest;
+    toi += interest;
+    var cap = 0;
+    if (rt === 'repayment') { cap = tp >= bal ? bal : Math.max(0, Math.min(bal, pmt - interest + curOp)); }
+    if (rt === 'interestonly' && tp >= bal) cap = bal;
+    bal = Math.max(0, bal - cap);
+    ma = m + 1;
+    cumI += interest; co.push(cumI);
+    var tp2 = potBals.reduce(function(a,b){ return a+b; }, 0);
+    os.push(tp2); bs.push(bal); lb.push(ds);
+    for (var psi = 0; psi < potBals.length; psi++) potSeries[psi].push(potBals[psi]);
+    rows.push({ds:ds, pot:tp2, eff:eff, interest:interest, cap:cap, bal:bal, el:el});
+    if (bal > 0.01) {
+      for (var pi3b = 0; pi3b < potBals.length; pi3b++) { potBals[pi3b] = Math.max(0, potBals[pi3b] + potMos[pi3b] + (nmAdj[pi3b]||0)); }
+      var newTp2 = potBals.reduce(function(a,b){ return a+b; }, 0);
+      if (newTp2 <= 0 && !potEmp) { potEmp = true; potEmpDate = ds; }
+    }
+    if (bal <= 0.01) break;
+    if (m >= tm-1 && rt === 'interestonly' && tp < bal) break;
+  }
+
+  var cs = lb.map(function(_, i){ return stdCs[Math.min(i, stdCs.length-1)] || sti; });
+  var eff0 = Math.max(0, mg - totalS0);
+  var endDate = new Date(sd); endDate.setMonth(endDate.getMonth() + ma);
+  var endStr = endDate.toLocaleDateString('en-GB', {month:'long', year:'numeric'});
+  var stdEnd = new Date(sd); stdEnd.setMonth(stdEnd.getMonth() + stdMonths);
+  var stdEndStr = stdEnd.toLocaleDateString('en-GB', {month:'long', year:'numeric'});
+  var m1days = new Date(sd.getFullYear(), sd.getMonth()+1, 0).getDate();
+  var offDayInt = offM1Int / m1days;
+  var stdDayInt = stdM1Int / stdM1Days;
+  var stdYr1 = stdCs[Math.min(11, stdCs.length-1)] || sti;
+  var offYr1 = co[Math.min(11, co.length-1)] || toi;
+  var potSum = pots.map(function(p){ return {name:p.name, bal:+p.balance||0, mo:p.potType==='equity'?0:(+p.monthly||0), isEq:p.potType==='equity'}; });
+
+  calcRes = {pmt:pmt,sti:sti,toi:toi,saving:sti-toi,msSaved:tm-ma,rows:rows,lb:lb,co:co,cs:cs,os:os,bs:bs,mg:mg,rate:(rate*100).toFixed(2),totalS0:totalS0,eff0:eff0,endStr:endStr,stdEndStr:stdEndStr,offM1Int:offM1Int,stdM1Int:stdM1Int,offDayInt:offDayInt,stdDayInt:stdDayInt,stdYr1:stdYr1,offYr1:offYr1,endIdx:ma-1,rt:rt,potExc:potExc,potExcDate:potExcDate,potEmp:potEmp,potEmpDate:potEmpDate,evCount:evts.filter(function(e){return e.date&&+e.amt>0;}).length,potSeries:potSeries,potSum:potSum,potNames:pots.map(function(p){return p.name;}),hasEq:hasEq};
+
+  var r = calcRes;
+
+  var wio = document.getElementById('w-io'); wio.style.display = r.rt==='interestonly' ? 'block' : 'none';
+  var weq = document.getElementById('w-eq'); weq.style.display = r.hasEq ? 'block' : 'none';
+  if (r.hasEq) {
+    document.getElementById('w-eq-b').innerHTML = 'This illustration includes pledged property equity - not liquid cash savings. This means:<br>A legal charge will be placed on the family member\'s property.<br>The equity cannot be withdrawn without lender consent.<br>The family member\'s ability to sell or remortgage their property will be restricted.<br><b>All parties must seek independent legal advice before proceeding.</b>';
+  }
+  var wex = document.getElementById('w-exceed');
+  wex.style.display = r.potExc ? 'block' : 'none';
+  if (r.potExc) wex.textContent = 'Total offset pot exceeds the mortgage balance from ' + r.potExcDate + '. No further interest is charged - consider paying off the mortgage in full.';
+  var wem = document.getElementById('w-empty');
+  wem.style.display = r.potEmp ? 'block' : 'none';
+  if (r.potEmp) wem.textContent = 'Total offset pot reached zero in ' + r.potEmpDate + '. From that point full interest applies to the entire balance.';
+
+  document.getElementById('res-ph').style.display = 'none';
+  document.getElementById('res-body').style.display = 'block';
+  document.getElementById('r-saving').textContent = f(r.saving);
+  document.getElementById('r-sub').textContent = 'You pay ' + f(r.toi) + ' vs ' + f(r.sti) + ' without offset';
+  document.getElementById('r-pmt').textContent = f2(r.pmt);
+  document.getElementById('r-m1').textContent = f2(r.offM1Int);
+  document.getElementById('r-tr').textContent = r.msSaved > 0 ? r.msSaved + ' months' : '-';
+  document.getElementById('r-end').textContent = r.endStr;
+  document.getElementById('r-std-end').textContent = r.stdEndStr;
+
+  var ptHtml = '';
+  for (var i = 0; i < r.potSum.length; i++) {
+    var p = r.potSum[i];
+    var dc = p.isEq ? '#e8445a' : POT_COLORS[i % POT_COLORS.length];
+    var dr2 = p.isEq ? '2px' : '50%';
+    ptHtml += '<tr>' +
+      '<td><div style="display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:' + dr2 + ';background:' + dc + ';display:inline-block"></span>' + p.name + '</div>' +
+      (p.isEq ? '<div style="font-size:9px;color:#e8445a">Pledged Equity</div>' : '') + '</td>' +
+      '<td class="tr" style="color:' + (p.isEq?'#e8445a':'#00d4aa') + '">' + f(p.bal) + '</td>' +
+      '<td class="tr" style="color:#7a8499">' + (p.isEq ? '-' : f(p.mo)+'/mo') + '</td>' +
+    '</tr>';
+  }
+  var totMo = r.potSum.reduce(function(a,p){ return a+p.mo; }, 0);
+  ptHtml += '<tr><td><b>Total</b></td><td class="tr green"><b>' + f(r.totalS0) + '</b></td><td class="tr" style="color:#7a8499"><b>' + f(totMo) + '/mo</b></td></tr>';
+  document.getElementById('t-pots').innerHTML = ptHtml;
+
+  document.getElementById('r-dd-s').textContent = f2(r.stdDayInt);
+  document.getElementById('r-dd-o').textContent = f2(r.offDayInt);
+  document.getElementById('r-dd-sv').textContent = f2(r.stdDayInt - r.offDayInt);
+  document.getElementById('r-dm-s').textContent = f2(r.stdM1Int);
+  document.getElementById('r-dm-o').textContent = f2(r.offM1Int);
+  document.getElementById('r-dm-sv').textContent = f2(r.stdM1Int - r.offM1Int);
+  document.getElementById('r-da-s').textContent = f(r.stdYr1);
+  document.getElementById('r-da-o').textContent = f(r.offYr1);
+  document.getElementById('r-da-sv').textContent = f(r.stdYr1 - r.offYr1);
+
+  var sumRows = [
+    ['Mortgage Balance', f(r.mg), ''],
+    ['Total Offset (drawable)', f(r.totalS0), ''],
+    ['Effective Balance', f(r.eff0), ''],
+    ['Rate', r.rate + '%', ''],
+    ['Total Interest (no offset)', f(r.sti), ''],
+    ['Total Interest (with offset)', f(r.toi), 'color:#00d4aa'],
+    ['Interest Saved', f(r.saving), 'color:#00d4aa'],
+    ['Life Events', r.evCount, '']
+  ];
+  var sumHtml = '';
+  for (var i = 0; i < sumRows.length; i++) {
+    sumHtml += '<tr><td style="color:#7a8499">' + sumRows[i][0] + '</td><td class="tr"' + (sumRows[i][2]?' style="'+sumRows[i][2]+'"':'') + '>' + sumRows[i][1] + '</td></tr>';
+  }
+  document.getElementById('t-summary').innerHTML = sumHtml;
+
+  var schedHtml = '';
+  for (var i = 0; i < rows.length; i++) {
+    var row = rows[i];
+    schedHtml += '<tr' + (row.el ? ' class="evrow"' : '') + '>' +
+      '<td>' + row.ds + (row.el ? ' ' + row.el : '') + '</td>' +
+      '<td class="tr">' + f(row.pot) + '</td>' +
+      '<td class="tr">' + f(row.eff) + '</td>' +
+      '<td class="tr">' + f2(row.interest) + '</td>' +
+      '<td class="tr">' + f2(row.cap) + '</td>' +
+      '<td class="tr">' + f(row.bal) + '</td>' +
+    '</tr>';
+  }
+  document.getElementById('t-sched').innerHTML = schedHtml;
+
+  document.getElementById('ch-ph').style.display = 'none';
+  document.getElementById('ch-body').style.display = 'block';
+  var ei2 = r.endIdx;
+  setTimeout(function() {
+    drawChart('c1', [{label:'Without Offset',data:r.cs,color:'#e8445a',labels:r.lb},{label:'With Offset',data:r.co,color:'#00d4aa',labels:r.lb}], true, ei2, r.endStr);
+    drawChart('c2', r.potSeries.map(function(s,i){ return {label:r.potNames[i],data:s,color:POT_COLORS[i%POT_COLORS.length],labels:r.lb}; }), true, ei2, r.endStr);
+    drawChart('c3', [{label:'Total Offset',data:r.os,color:'#4f8ef7',labels:r.lb}], false, ei2, r.endStr);
+    drawChart('c4', [{label:'Balance',data:r.bs,color:'#f5a623',labels:r.lb}], false, ei2, r.endStr);
+  }, 80);
+
+  document.getElementById('btn-pdf').style.display = 'inline-block';
+  document.getElementById('btn-email').style.display = 'inline-block';
+
+  var evTypeLabel = {'lump_in':'Lump Sum IN','lump_out':'Lump Sum OUT','change_saving':'Change Monthly Savings','change_overpayment':'Change Monthly Overpayment','rate_change':'Rate Change'};
+  var printEvHtml = '';
+  var validEvts = evts.filter(function(e){ return e.date; });
+  if (!validEvts.length) {
+    printEvHtml = '<tr><td colspan="4" style="color:#7a8499">No life events added.</td></tr>';
+  } else {
+    for (var pei = 0; pei < validEvts.length; pei++) {
+      var pe = validEvts[pei];
+      var peType = evTypeLabel[pe.type] || pe.type;
+      var peDetail = pe.type === 'rate_change' ? (pe.amt || '-') + '%' : (pe.amt ? f(+pe.amt) : '-');
+      var peStop = pe.stopdate || 'Permanent';
+      var peDate = pe.date ? new Date(pe.date).toLocaleDateString('en-GB', {month:'short', year:'numeric', day:'numeric'}) : '-';
+      printEvHtml += '<tr><td>' + peDate + '</td><td>' + peType + '</td><td>' + peDetail + '</td><td>' + (pe.type === 'lump_in' || pe.type === 'lump_out' ? '-' : peStop) + '</td></tr>';
+    }
+  }
+  document.getElementById('print-ev-table').innerHTML = printEvHtml;
+
+  showTab('results');
+}
+
+function doEmail() {
+  if (!calcRes) return;
+  var r = calcRes, b = getBrand();
+  var potLines = '';
+  for (var i = 0; i < r.potSum.length; i++) {
+    var p = r.potSum[i];
+    potLines += '  ' + p.name + ': ' + f(p.bal) + (p.isEq ? ' (Pledged Equity)' : ' (monthly: ' + f(p.mo) + ')') + '\n';
+  }
+  var body = 'Dear Client,\n\nPlease find below your personalised offset mortgage illustration.\n\n' +
+    'MORTGAGE SUMMARY\n================\n' +
+    'Mortgage Balance: ' + f(r.mg) + '\n' +
+    'Annual Rate: ' + r.rate + '%\n' +
+    'Total Offset: ' + f(r.totalS0) + '\n' +
+    'Effective Balance: ' + f(r.eff0) + '\n\n' +
+    'LINKED ACCOUNTS\n===============\n' + potLines + '\n' +
+    'RESULTS\n=======\n' +
+    'Interest without offset: ' + f(r.sti) + '\n' +
+    'Interest with offset: ' + f(r.toi) + '\n' +
+    'Total Saved: ' + f(r.saving) + '\n' +
+    'Monthly Payment: ' + f2(r.pmt) + '\n' +
+    'Term Reduction: ' + (r.msSaved>0?r.msSaved+' months':'-') + '\n' +
+    'Original End Date: ' + r.stdEndStr + '\n' +
+    'Projected End Date: ' + r.endStr + '\n\n' +
+    'LIFE EVENTS\n===========\n' + (function(){
+      if (!evts.length) return 'None.\n';
+      var lines = '';
+      var etl = {lump_in:'Lump Sum IN',lump_out:'Lump Sum OUT',change_saving:'Change Monthly Savings',change_overpayment:'Change Monthly Overpayment',rate_change:'Rate Change'};
+      for (var i=0;i<evts.length;i++){
+        var e=evts[i];
+        if(!e.date) continue;
+        var det = e.type==='rate_change' ? (e.amt||'-')+'%' : (e.amt?f(+e.amt):'-');
+        var stop = (e.type==='change_saving'||e.type==='change_overpayment') ? (e.stopdate?(' to '+e.stopdate):'(permanent)') : '';
+        lines += (etl[e.type]||e.type) + ': ' + det + ' from ' + e.date + stop + '\n';
+      }
+      return lines || 'None.\n';
+    })() + '\n' +
+    (r.hasEq ? 'EQUITY NOTICE: This illustration includes pledged property equity. A legal charge on a third party property is involved. All parties must seek independent legal advice.\n\n' : '') +
+    'IMPORTANT: This illustration is for indicative purposes only and does not constitute financial advice. Always consult an FCA-authorised mortgage adviser. Your home may be repossessed if you do not keep up repayments on your mortgage.\n\n' +
+    (b.adviser ? 'Adviser: ' + b.adviser + '\n' : '') +
+    (b.company ? 'Company: ' + b.company + '\n' : '') +
+    (b.contact ? 'Contact: ' + b.contact + '\n' : '') +
+    (b.tagline ? b.tagline + '\n' : '');
+  document.getElementById('email-text').value = body.trim();
+  document.getElementById('copy-msg').textContent = '';
+  document.getElementById('email-modal').style.display = 'block';
+}
+function closeEmail(){ document.getElementById('email-modal').style.display='none'; }
+function copyEmail(){
+  var ta=document.getElementById('email-text'), msg=document.getElementById('copy-msg');
+  function fallback(){
+    ta.focus(); ta.select(); ta.setSelectionRange(0, ta.value.length);
+    var ok=false; try { ok=document.execCommand('copy'); } catch(e) {}
+    msg.textContent = ok ? 'Copied. Paste it into your email.' : 'Text selected. Tap and hold, then choose Copy.';
+  }
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(ta.value).then(function(){ msg.textContent='Copied. Paste it into your email.'; }, fallback);
+    } else fallback();
+  } catch(e) { fallback(); }
+}
+function toast(t){ var el=document.getElementById('toast'); el.textContent=t; el.style.display='block'; clearTimeout(toast._t); toast._t=setTimeout(function(){ el.style.display='none'; },4000); }
+
+var downloadsApi = null;
+if (window.claude && window.claude.use) {
+  window.claude.use('downloads').then(function(d){ downloadsApi = d; }).catch(function(){});
+}
+
+function makePdf() {
+  if (!calcRes) return;
+  if (!window.jspdf) { toast('PDF tool did not load. Check your connection and try again.'); return; }
+  var r = calcRes, b = getBrand();
+  var J = window.jspdf.jsPDF, doc = new J({unit:'mm', format:'a4'});
+  var W = 210, y = 16, L = 14;
+  function money(v){ return '\u00A3' + Math.round(v).toLocaleString('en-GB'); }
+  function money2(v){ return '\u00A3' + Number(v).toFixed(2); }
+  doc.setFont('helvetica','bold'); doc.setFontSize(18); doc.setTextColor(20,20,20);
+  doc.text('Offset Mortgage Illustration', L, y); y += 7;
+  doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(90,90,90);
+  var who = [b.adviser, b.company, b.contact].filter(Boolean).join('  |  ');
+  if (who) { doc.text(who, L, y); y += 5; }
+  if (b.tagline) { doc.text(b.tagline, L, y); y += 5; }
+  doc.text('Prepared ' + new Date().toLocaleDateString('en-GB', {day:'numeric', month:'long', year:'numeric'}), L, y); y += 6;
+  doc.setFillColor(255,243,205); doc.rect(L, y, W-2*L, 11, 'F');
+  doc.setFontSize(8); doc.setTextColor(133,100,4);
+  doc.text(doc.splitTextToSize('Illustrative purposes only. Not financial advice. Always consult an FCA-authorised mortgage adviser. Your home may be repossessed if you do not keep up repayments on your mortgage.', W-2*L-4), L+2, y+4);
+  y += 16;
+  doc.setFillColor(212,237,218); doc.rect(L, y, W-2*L, 18, 'F');
+  doc.setTextColor(21,87,36); doc.setFontSize(9); doc.text('Total interest saved with offset', L+3, y+5);
+  doc.setFont('helvetica','bold'); doc.setFontSize(20); doc.text(money(r.saving), L+3, y+13);
+  doc.setFont('helvetica','normal'); doc.setFontSize(9);
+  doc.text('You pay ' + money(r.toi) + ' vs ' + money(r.sti) + ' without offset', W-L-3, y+13, {align:'right'});
+  y += 24;
+  var head = {fillColor:[233,236,239], textColor:[50,50,50], fontStyle:'bold'};
+  doc.autoTable({startY:y, margin:{left:L,right:L}, theme:'grid', headStyles:head, styles:{fontSize:9},
+    head:[['Summary','']],
+    body:[
+      ['Mortgage balance', money(r.mg)], ['Annual rate', r.rate + '%'],
+      ['Repayment type', r.rt==='interestonly' ? 'Interest only' : 'Repayment'],
+      ['Total offset (starting)', money(r.totalS0)], ['Effective balance', money(r.eff0)],
+      ['Standard monthly payment', money2(r.pmt)], ['Month 1 interest with offset', money2(r.offM1Int)],
+      ['Term reduction', r.msSaved>0 ? r.msSaved + ' months' : '-'],
+      ['Original end date', r.stdEndStr], ['Projected end date', r.endStr]
+    ], columnStyles:{1:{halign:'right'}}});
+  y = doc.lastAutoTable.finalY + 6;
+  doc.autoTable({startY:y, margin:{left:L,right:L}, theme:'grid', headStyles:head, styles:{fontSize:9},
+    head:[['Account holder','Type','Starting balance','Monthly']],
+    body:r.potSum.map(function(p){ return [p.name, p.isEq?'Pledged equity':'Cash savings', money(p.bal), p.isEq?'-':money(p.mo)]; }),
+    columnStyles:{2:{halign:'right'},3:{halign:'right'}}});
+  y = doc.lastAutoTable.finalY + 6;
+  doc.autoTable({startY:y, margin:{left:L,right:L}, theme:'grid', headStyles:head, styles:{fontSize:9},
+    head:[['Interest','Without offset','With offset','Saving']],
+    body:[
+      ['Daily (month 1)', money2(r.stdDayInt), money2(r.offDayInt), money2(r.stdDayInt-r.offDayInt)],
+      ['Month 1', money2(r.stdM1Int), money2(r.offM1Int), money2(r.stdM1Int-r.offM1Int)],
+      ['Year 1', money(r.stdYr1), money(r.offYr1), money(r.stdYr1-r.offYr1)],
+      ['Whole term', money(r.sti), money(r.toi), money(r.saving)]
+    ], columnStyles:{1:{halign:'right'},2:{halign:'right'},3:{halign:'right'}}});
+  y = doc.lastAutoTable.finalY + 6;
+  var etl = {lump_in:'Lump sum in',lump_out:'Lump sum out',change_saving:'Change monthly savings',change_overpayment:'Change monthly overpayment',rate_change:'Rate change'};
+  var ev = evts.filter(function(e){ return e.date; });
+  if (ev.length) {
+    doc.autoTable({startY:y, margin:{left:L,right:L}, theme:'grid', headStyles:head, styles:{fontSize:9},
+      head:[['Life event date','Event','Detail','Stop date']],
+      body:ev.map(function(e){ return [new Date(e.date).toLocaleDateString('en-GB'), etl[e.type]||e.type, e.type==='rate_change'?(e.amt||'-')+'%':(e.amt?money(+e.amt):'-'), (e.type==='change_saving'||e.type==='change_overpayment')?(e.stopdate?new Date(e.stopdate).toLocaleDateString('en-GB'):'Permanent'):'-']; })});
+    y = doc.lastAutoTable.finalY + 6;
+  }
+  if (r.hasEq) {
+    doc.setTextColor(114,28,36); doc.setFontSize(9);
+    var t = doc.splitTextToSize('Equity notice: this illustration includes pledged property equity. A legal charge will be placed on a third party property, the equity cannot be withdrawn without lender consent, and all parties must seek independent legal advice.', W-2*L);
+    if (y + t.length*4 > 285) { doc.addPage(); y = 16; }
+    doc.text(t, L, y); y += t.length*4 + 4;
+  }
+  try {
+    var c1 = document.getElementById('c1');
+    if (c1 && c1.width) {
+      doc.addPage(); y = 16;
+      doc.setTextColor(20,20,20); doc.setFont('helvetica','bold'); doc.setFontSize(12);
+      doc.text('Cumulative interest: with vs without offset', L, y); y += 4;
+      var ih = (W-2*L) * c1.height / c1.width;
+      doc.setFillColor(11,13,18); doc.rect(L, y, W-2*L, ih, 'F');
+      doc.addImage(c1.toDataURL('image/png'), 'PNG', L, y, W-2*L, ih); y += ih + 8;
+      var c4 = document.getElementById('c4');
+      if (c4 && c4.width) {
+        doc.text('Remaining mortgage balance', L, y); y += 4;
+        var ih4 = (W-2*L) * c4.height / c4.width;
+        doc.rect(L, y, W-2*L, ih4, 'F');
+        doc.addImage(c4.toDataURL('image/png'), 'PNG', L, y, W-2*L, ih4); y += ih4 + 8;
+      }
+    }
+  } catch(e) {}
+  doc.addPage(); y = 16;
+  doc.setTextColor(20,20,20); doc.setFont('helvetica','bold'); doc.setFontSize(12);
+  doc.text('Month by month schedule', L, y);
+  doc.autoTable({startY:y+3, margin:{left:L,right:L}, theme:'striped', headStyles:head, styles:{fontSize:7.5, cellPadding:1.2},
+    head:[['Month','Offset pot','Effective','Interest','Capital','Remaining']],
+    body:r.rows.map(function(x){ return [x.ds + (x.el?'  '+x.el:''), money(x.pot), money(x.eff), money2(x.interest), money2(x.cap), money(x.bal)]; }),
+    columnStyles:{1:{halign:'right'},2:{halign:'right'},3:{halign:'right'},4:{halign:'right'},5:{halign:'right'}}});
+  var name = 'Offset illustration ' + new Date().toISOString().split('T')[0] + '.pdf';
+  var blob = doc.output('blob');
+  if (downloadsApi) {
+    downloadsApi.save({filename:name, data:blob}).then(function(){ toast('PDF ready.'); }, function(err){
+      var c = err && err.code;
+      if (c === 'declined') return;
+      if (c === 'rate_limited') { toast('A save is already open. Try again in a moment.'); return; }
+      toast('The PDF could not be saved here.');
+    });
+  } else {
+    try { doc.save(name); } catch(e) { toast('The PDF could not be saved here.'); }
+  }
+}
 </script>
 </body>
 </html>
